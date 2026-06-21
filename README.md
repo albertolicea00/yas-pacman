@@ -24,6 +24,22 @@ This application is an unofficial graphical frontend. It runs standard CLI comma
 
 - The `pacman` command-line tool must be installed on your system and available in your shell's `PATH`.
 
-## 📄 License
+## 🤝 Contributing
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Contributions of all kinds are welcome — bug fixes, UI improvements, theme designs, translation corrections, testing on different platforms.
+
+→ **[CONTRIBUTING.md](CONTRIBUTING.md)** — dev setup, project structure, pull request guidelines
+
+- 🐛 [Report a bug](https://github.com/albertolicea00/yas-pacman/issues/new?template=bug_report.md)
+- 💡 [Request a feature](https://github.com/albertolicea00/yas-pacman/issues/new?template=feature_request.md)
+
+## ⚖️ License & Legal
+
+**Yet Another Store for Pacman** is released under the **[MIT License](LICENSE)**.
+
+By using this software you agree to the **[EULA](EULA.md)**. You are solely responsible for using it in compliance with applicable law and the terms of service of any package repository or registry you access. The developers do not endorse piracy or licensing infringement.
+
+Third-party tools (primarily **Pacman**) are not bundled and governed by their own licenses.
+
+🔐 Security vulnerabilities → **[SECURITY.md](SECURITY.md)**
+
