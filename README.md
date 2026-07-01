@@ -24,6 +24,22 @@ This application is an unofficial graphical frontend. It runs standard CLI comma
 
 - The `pacman` command-line tool must be installed on your system and available in your shell's `PATH`.
 
+## 🧑‍💻 Building from source
+
+> **Status**: the code scaffold is rolling out across the suite (yas-brew first).
+> The commands below are the standard YAS build flow and will work as soon as
+> the scaffold lands in this repository.
+
+```bash
+git clone https://github.com/albertolicea00/yas-pacman.git
+cd yas-pacman
+cmake --preset default        # configure (Ninja, Debug)
+cmake --build --preset default
+./build/default/yas-pacman
+```
+
+Run the test suite with `ctest --preset default`. Release build: swap `default` for `release`. Full setup details → [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## 🤝 Contributing
 
 Contributions of all kinds are welcome — bug fixes, UI improvements, theme designs, translation corrections, testing on different platforms.
