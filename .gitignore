@@ -5,3 +5,8 @@ Thumbs.db
 # Folder-level config
 .vscode/
 .idea/
+
+# Build output
+build/
+CMakeLists.txt.user
+*.autosave
