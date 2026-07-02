@@ -1,6 +1,49 @@
 #include "appcontroller.h"
 
+#include <QDir>
+#include <QDirIterator>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QLocale>
+#include <QSaveFile>
+#include <QStandardPaths>
+
 namespace yas {
+
+namespace {
+
+QJsonObject packageToJson(const Package &p)
+{
+    return {
+        {QStringLiteral("id"), p.id},
+        {QStringLiteral("name"), p.name},
+        {QStringLiteral("version"), p.version},
+        {QStringLiteral("installedVersion"), p.installedVersion},
+        {QStringLiteral("description"), p.description},
+        {QStringLiteral("homepage"), p.homepage},
+        {QStringLiteral("source"), p.source},
+        {QStringLiteral("kind"), p.kind},
+        {QStringLiteral("pinned"), p.pinned},
+    };
+}
+
+Package packageFromJson(const QJsonObject &o)
+{
+    Package p;
+    p.id = o.value(QStringLiteral("id")).toString();
+    p.name = o.value(QStringLiteral("name")).toString();
+    p.version = o.value(QStringLiteral("version")).toString();
+    p.installedVersion = o.value(QStringLiteral("installedVersion")).toString();
+    p.description = o.value(QStringLiteral("description")).toString();
+    p.homepage = o.value(QStringLiteral("homepage")).toString();
+    p.source = o.value(QStringLiteral("source")).toString();
+    p.kind = o.value(QStringLiteral("kind")).toString();
+    p.pinned = o.value(QStringLiteral("pinned")).toBool();
+    return p;
+}
+
+} // namespace
 
 AppController::AppController(PackageManagerAdapter *adapter, QObject *parent)
     : QObject(parent)
@@ -38,6 +81,18 @@ QVariantList AppController::actions() const
 
 void AppController::initialize()
 {
+    // Paint instantly from the disk cache, then refresh live below.
+    auto cachedInstalled = loadListCache(QStringLiteral("installed"));
+    if (!cachedInstalled.isEmpty()) {
+        m_installedIndex.clear();
+        for (const Package &p : std::as_const(cachedInstalled))
+            m_installedIndex.insert(p.id, p);
+        m_installedModel.setPackages(std::move(cachedInstalled));
+    }
+    auto cachedOutdated = loadListCache(QStringLiteral("outdated"));
+    if (!cachedOutdated.isEmpty())
+        m_outdatedModel.setPackages(std::move(cachedOutdated));
+
     if (!m_cli.found)
         return;
     refreshAll();
@@ -69,14 +124,25 @@ void AppController::search(const QString &query)
 
 void AppController::requestInfo(const QString &packageId, const QString &kind)
 {
+    // Serve cached details immediately; the fresh fetch overwrites below.
+    loadDetailsCache();
+    const auto cached = m_detailsCache.constFind(packageId);
+    if (cached != m_detailsCache.constEnd())
+        emit infoReady(cached.value());
+
     m_queue.enqueue({QStringLiteral("info"), packageId,
                      m_adapter->infoCommand(packageId, kind),
                      [this](bool ok, const QString &out, const QString &) {
                          if (!ok)
                              return;
                          const auto packages = m_adapter->parseInfo(out);
-                         if (!packages.isEmpty())
-                             emit infoReady(PackageListModel::toMap(packages.first()));
+                         if (!packages.isEmpty()) {
+                             const QVariantMap map =
+                                 PackageListModel::toMap(packages.first());
+                             m_detailsCache.insert(packages.first().id, map);
+                             saveDetailsCache();
+                             emit infoReady(map);
+                         }
                      }});
 }
 
@@ -91,6 +157,7 @@ void AppController::refreshInstalled()
                          m_installedIndex.clear();
                          for (const Package &p : packages)
                              m_installedIndex.insert(p.id, p);
+                         saveListCache(QStringLiteral("installed"), packages);
                          m_installedModel.setPackages(std::move(packages));
                      }});
 }
@@ -102,7 +169,9 @@ void AppController::refreshOutdated()
                      [this](bool ok, const QString &out, const QString &) {
                          if (!ok)
                              return;
-                         m_outdatedModel.setPackages(m_adapter->parseOutdated(out));
+                         auto packages = m_adapter->parseOutdated(out);
+                         saveListCache(QStringLiteral("outdated"), packages);
+                         m_outdatedModel.setPackages(std::move(packages));
                      }});
 }
 
@@ -224,6 +293,84 @@ void AppController::refreshAll()
 {
     refreshInstalled();
     refreshOutdated();
+}
+
+QString AppController::cacheDir() const
+{
+    const QString dir =
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+        + QStringLiteral("/cache");
+    QDir().mkpath(dir);
+    return dir;
+}
+
+void AppController::saveListCache(const QString &name,
+                                  const QList<Package> &packages) const
+{
+    QJsonArray array;
+    for (const Package &p : packages)
+        array.append(packageToJson(p));
+    QSaveFile file(cacheDir() + QLatin1Char('/') + name + QStringLiteral(".json"));
+    if (!file.open(QIODevice::WriteOnly))
+        return;
+    file.write(QJsonDocument(array).toJson(QJsonDocument::Compact));
+    file.commit();
+}
+
+QList<Package> AppController::loadListCache(const QString &name) const
+{
+    QFile file(cacheDir() + QLatin1Char('/') + name + QStringLiteral(".json"));
+    if (!file.open(QIODevice::ReadOnly))
+        return {};
+    QList<Package> result;
+    const QJsonArray array = QJsonDocument::fromJson(file.readAll()).array();
+    for (const auto &value : array)
+        result.append(packageFromJson(value.toObject()));
+    return result;
+}
+
+void AppController::loadDetailsCache()
+{
+    if (m_detailsCacheLoaded)
+        return;
+    m_detailsCacheLoaded = true;
+    QFile file(cacheDir() + QStringLiteral("/details.json"));
+    if (!file.open(QIODevice::ReadOnly))
+        return;
+    const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
+    for (auto it = root.constBegin(); it != root.constEnd(); ++it)
+        m_detailsCache.insert(it.key(), it.value().toObject().toVariantMap());
+}
+
+void AppController::saveDetailsCache() const
+{
+    QJsonObject root;
+    for (auto it = m_detailsCache.constBegin(); it != m_detailsCache.constEnd(); ++it)
+        root.insert(it.key(), QJsonObject::fromVariantMap(it.value()));
+    QSaveFile file(cacheDir() + QStringLiteral("/details.json"));
+    if (!file.open(QIODevice::WriteOnly))
+        return;
+    file.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
+    file.commit();
+}
+
+void AppController::clearCache()
+{
+    QDir(cacheDir()).removeRecursively();
+    m_detailsCache.clear();
+    m_detailsCacheLoaded = false;
+    emit toast(tr("Cache cleared"), false);
+}
+
+QString AppController::cacheSizeText() const
+{
+    qint64 total = 0;
+    QDirIterator it(cacheDir(), QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        it.next();
+        total += it.fileInfo().size();
+    }
+    return QLocale().formattedDataSize(total);
 }
 
 void AppController::annotateInstalled(QList<Package> &packages) const

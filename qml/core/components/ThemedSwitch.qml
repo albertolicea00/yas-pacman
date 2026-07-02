@@ -26,7 +26,7 @@ Item {
             text: root.label
             color: Theme.textPrimary
             font.family: Theme.uiFont
-            font.pixelSize: 13
+            font.pixelSize: Theme.fs(13)
         }
         Text {
             width: parent.width
@@ -34,7 +34,7 @@ Item {
             text: root.description
             color: Theme.textSecondary
             font.family: Theme.uiFont
-            font.pixelSize: 11
+            font.pixelSize: Theme.fs(11)
             wrapMode: Text.WordWrap
         }
     }

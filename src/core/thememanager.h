@@ -24,6 +24,7 @@ class ThemeManager : public QObject {
                    WRITE setShowFeatured NOTIFY showFeaturedChanged)
     Q_PROPERTY(QString featuredUrl READ featuredUrl
                    WRITE setFeaturedUrl NOTIFY featuredUrlChanged)
+    Q_PROPERTY(double uiScale READ uiScale WRITE setUiScale NOTIFY uiScaleChanged)
 public:
     explicit ThemeManager(QObject *parent = nullptr);
 
@@ -61,6 +62,10 @@ public:
     QString featuredUrl() const { return m_featuredUrl; }
     void setFeaturedUrl(const QString &url);
 
+    // Text/element size multiplier (1.0 normal, 1.15 large, 1.3 extra).
+    double uiScale() const { return m_uiScale; }
+    void setUiScale(double scale);
+
 signals:
     void themeModeChanged();
     void darkModeChanged();
@@ -70,6 +75,7 @@ signals:
     void showDescriptionsChanged();
     void showFeaturedChanged();
     void featuredUrlChanged();
+    void uiScaleChanged();
 
 private:
     bool systemPrefersDark() const;
@@ -82,6 +88,7 @@ private:
     bool m_showDescriptions = true;
     bool m_showFeatured = true;
     QString m_featuredUrl;
+    double m_uiScale = 1.0;
 };
 
 } // namespace yas

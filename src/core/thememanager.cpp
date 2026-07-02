@@ -24,6 +24,9 @@ ThemeManager::ThemeManager(QObject *parent)
     m_showFeatured =
         m_settings.value(QStringLiteral("ui/showFeatured"), true).toBool();
     m_featuredUrl = m_settings.value(QStringLiteral("ui/featuredUrl")).toString();
+    m_uiScale = m_settings.value(QStringLiteral("ui/scale"), 1.0).toDouble();
+    if (m_uiScale < 0.8 || m_uiScale > 2.0)
+        m_uiScale = 1.0;
 
     // Follow the OS live while in auto mode (user flips system appearance).
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this,
@@ -118,6 +121,15 @@ void ThemeManager::setFeaturedUrl(const QString &url)
     m_featuredUrl = url;
     m_settings.setValue(QStringLiteral("ui/featuredUrl"), url);
     emit featuredUrlChanged();
+}
+
+void ThemeManager::setUiScale(double scale)
+{
+    if (qFuzzyCompare(m_uiScale, scale))
+        return;
+    m_uiScale = scale;
+    m_settings.setValue(QStringLiteral("ui/scale"), scale);
+    emit uiScaleChanged();
 }
 
 void ThemeManager::cycleThemeMode()

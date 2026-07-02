@@ -32,7 +32,7 @@ Flickable {
             text: qsTr("%1 Status").arg(App.managerName)
             color: Theme.textPrimary
             font.family: Theme.headingFont
-            font.pixelSize: 24
+            font.pixelSize: Theme.fs(24)
             font.weight: Font.Bold
         }
 

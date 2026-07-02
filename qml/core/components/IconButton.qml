@@ -13,7 +13,7 @@ Item {
     signal clicked()
 
     implicitWidth: contentRow.implicitWidth + 14
-    implicitHeight: 28
+    implicitHeight: Theme.fs(28)
 
     Rectangle {
         anchors.fill: parent
@@ -30,7 +30,7 @@ Item {
             id: glyph
             anchors.verticalCenter: parent.verticalCenter
             color: root.tint
-            font.pixelSize: 14
+            font.pixelSize: Theme.fs(14)
         }
         Text {
             visible: root.label.length > 0
@@ -38,7 +38,7 @@ Item {
             text: root.label
             color: root.tint
             font.family: Theme.uiFont
-            font.pixelSize: 12
+            font.pixelSize: Theme.fs(12)
         }
     }
 

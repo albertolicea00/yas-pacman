@@ -2,8 +2,9 @@ import QtQuick
 import Yas.Core
 
 PackageBrowser {
-    title: qsTr("Updates")
     model: App.outdatedModel
+    placeholder: qsTr("Filter pending updates")
+    liveFilter: true
     emptyText: qsTr("Everything is up to date")
     showRefresh: true
     onRefresh: App.refreshOutdated()

@@ -11,6 +11,8 @@ Rectangle {
     readonly property bool hasPackage: pkg && pkg.packageId !== undefined
     property bool loading: false
     property string _fetchedId: ""
+    property bool depsVisible: false
+    property string depsOutput: ""
     signal closeRequested()
 
     color: "transparent"
@@ -19,7 +21,13 @@ Rectangle {
         if (!hasPackage) {
             _fetchedId = ""
             loading = false
+            depsVisible = false
+            depsOutput = ""
             return
+        }
+        if (pkg.packageId !== _fetchedId) {
+            depsVisible = false
+            depsOutput = ""
         }
         if (YasManager.autoLoadDetails && pkg.packageId !== _fetchedId) {
             _fetchedId = pkg.packageId
@@ -34,7 +42,7 @@ Rectangle {
         text: qsTr("Select a package")
         color: Theme.textSecondary
         font.family: Theme.uiFont
-        font.pixelSize: 14
+        font.pixelSize: Theme.fs(14)
     }
 
     Column {
@@ -43,18 +51,51 @@ Rectangle {
         anchors.margins: 20
         spacing: 10
 
-        // Header: name + icon operations pinned to the top-right corner.
+        // Header: favicon + name + operations pinned to the top-right corner.
         Row {
             width: parent.width
-            spacing: 6
+            spacing: 8
+
+            Rectangle { // favicon with initial fallback
+                width: Theme.fs(36); height: Theme.fs(36); radius: Theme.fs(18)
+                anchors.verticalCenter: parent.verticalCenter
+                color: Theme.accentSubtle
+                clip: true
+                Text {
+                    anchors.centerIn: parent
+                    visible: favicon.status !== Image.Ready
+                    text: root.hasPackage && root.pkg.name.length > 0
+                          ? root.pkg.name.charAt(0).toUpperCase() : "?"
+                    color: Theme.accent
+                    font.family: Theme.uiFont
+                    font.pixelSize: Theme.fs(16)
+                    font.weight: Font.Bold
+                }
+                Image {
+                    id: favicon
+                    anchors.fill: parent
+                    anchors.margins: 5
+                    fillMode: Image.PreserveAspectFit
+                    visible: status === Image.Ready
+                    source: {
+                        if (!root.hasPackage || !root.pkg.homepage
+                            || root.pkg.homepage.length === 0)
+                            return ""
+                        const host = root.pkg.homepage.split("/")[2] || ""
+                        return host.length > 0
+                               ? "https://www.google.com/s2/favicons?domain=" + host + "&sz=64"
+                               : ""
+                    }
+                }
+            }
 
             Text {
-                width: parent.width - opsRow.implicitWidth - 6
+                width: parent.width - opsRow.implicitWidth - Theme.fs(36) - 16
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.hasPackage ? root.pkg.name : ""
                 color: Theme.textPrimary
                 font.family: Theme.headingFont
-                font.pixelSize: 20
+                font.pixelSize: Theme.fs(20)
                 font.weight: Font.Bold
                 elide: Text.ElideRight
             }
@@ -67,25 +108,24 @@ Rectangle {
                 IconButton {
                     visible: root.hasPackage && !root.pkg.installed
                     icon: "+"
+                    label: qsTr("Install")
                     tint: Theme.accent
-                    tooltip: qsTr("Install")
                     onClicked: App.install(root.pkg.packageId, root.pkg.kind)
                 }
                 IconButton {
                     visible: root.hasPackage && root.pkg.outdated
                     icon: "↑"
+                    label: qsTr("Upgrade")
                     tint: Theme.accent
-                    tooltip: qsTr("Upgrade")
                     onClicked: root.confirmOrRun("upgrade")
                 }
                 IconButton {
                     visible: root.hasPackage && root.pkg.installed
                              && App.canPin(root.pkg.packageId, root.pkg.kind)
                     icon: root.hasPackage && root.pkg.pinned ? "⚑" : "⚐"
+                    label: root.hasPackage && root.pkg.pinned ? qsTr("Unpin") : qsTr("Pin")
                     tint: root.hasPackage && root.pkg.pinned ? Theme.accent
                                                              : Theme.textSecondary
-                    tooltip: root.hasPackage && root.pkg.pinned ? qsTr("Unpin")
-                                                                : qsTr("Pin")
                     onClicked: root.pkg.pinned
                                ? App.unpin(root.pkg.packageId, root.pkg.kind)
                                : App.pin(root.pkg.packageId, root.pkg.kind)
@@ -93,8 +133,8 @@ Rectangle {
                 IconButton {
                     visible: root.hasPackage && root.pkg.installed
                     icon: "−"
+                    label: qsTr("Uninstall")
                     tint: Theme.danger
-                    tooltip: qsTr("Uninstall")
                     onClicked: root.confirmOrRun("uninstall")
                 }
                 IconButton {
@@ -121,7 +161,7 @@ Rectangle {
                 text: qsTr("Loading details…")
                 color: Theme.textSecondary
                 font.family: Theme.uiFont
-                font.pixelSize: 12
+                font.pixelSize: Theme.fs(12)
             }
         }
 
@@ -131,7 +171,7 @@ Rectangle {
             text: root.hasPackage ? root.pkg.description : ""
             color: Theme.textSecondary
             font.family: Theme.uiFont
-            font.pixelSize: 13
+            font.pixelSize: Theme.fs(13)
             wrapMode: Text.WordWrap
         }
 
@@ -140,17 +180,17 @@ Rectangle {
             Text {
                 visible: root.hasPackage && root.pkg.version.length > 0
                 text: qsTr("Latest: %1").arg(root.hasPackage ? root.pkg.version : "")
-                color: Theme.textSecondary; font.family: Theme.monoFont; font.pixelSize: 12
+                color: Theme.textSecondary; font.family: Theme.monoFont; font.pixelSize: Theme.fs(12)
             }
             Text {
                 visible: root.hasPackage && root.pkg.installed
                 text: qsTr("Installed: %1").arg(root.hasPackage ? root.pkg.installedVersion : "")
-                color: Theme.textSecondary; font.family: Theme.monoFont; font.pixelSize: 12
+                color: Theme.textSecondary; font.family: Theme.monoFont; font.pixelSize: Theme.fs(12)
             }
             Text {
                 visible: root.hasPackage && root.pkg.source.length > 0
                 text: qsTr("Source: %1").arg(root.hasPackage ? root.pkg.source : "")
-                color: Theme.textSecondary; font.family: Theme.monoFont; font.pixelSize: 12
+                color: Theme.textSecondary; font.family: Theme.monoFont; font.pixelSize: Theme.fs(12)
             }
         }
 
@@ -161,7 +201,7 @@ Rectangle {
             color: Theme.accent
             linkColor: Theme.accent
             font.family: Theme.uiFont
-            font.pixelSize: 12
+            font.pixelSize: Theme.fs(12)
             elide: Text.ElideRight
             width: parent.width
             onLinkActivated: link => Qt.openUrlExternally(link)
@@ -172,15 +212,16 @@ Rectangle {
             IconButton {
                 visible: root.hasPackage && root.pkg.installed
                          && (App.hasAction("deps") || App.hasAction("depends"))
-                icon: "⇊"
+                icon: root.depsVisible ? "▾" : "⇊"
                 label: qsTr("Dependencies")
+                tint: root.depsVisible ? Theme.accent : Theme.textSecondary
                 tooltip: qsTr("Show what this package depends on")
                 onClicked: {
-                    const actionId = App.hasAction("deps") ? "deps" : "depends"
-                    depsDialog.title = qsTr("Dependencies of %1").arg(root.pkg.packageId)
-                    depsText.text = qsTr("Loading…")
-                    depsDialog.open()
-                    App.fetchActionOutput(actionId, root.pkg.packageId)
+                    root.depsVisible = !root.depsVisible
+                    if (root.depsVisible && root.depsOutput.length === 0) {
+                        const actionId = App.hasAction("deps") ? "deps" : "depends"
+                        App.fetchActionOutput(actionId, root.pkg.packageId)
+                    }
                 }
             }
             IconButton {
@@ -190,6 +231,35 @@ Rectangle {
                 onClicked: {
                     root.loading = true
                     App.requestInfo(root.pkg.packageId, root.pkg.kind)
+                }
+            }
+        }
+
+        // Inline dependencies block (fills the remaining pane height).
+        Rectangle {
+            visible: root.depsVisible
+            width: parent.width
+            height: Math.max(80, parent.height - y)
+            radius: Theme.radius
+            color: Theme.base
+            border.color: Theme.border
+
+            Flickable {
+                anchors.fill: parent
+                anchors.margins: 10
+                clip: true
+                contentHeight: depsText.implicitHeight
+                ScrollBar.vertical: ScrollBar {}
+
+                Text {
+                    id: depsText
+                    width: parent.width
+                    text: root.depsOutput.length > 0 ? root.depsOutput : qsTr("Loading…")
+                    color: Theme.textSecondary
+                    font.family: Theme.monoFont
+                    font.pixelSize: Theme.fs(12)
+                    wrapMode: Text.WrapAnywhere
+                    textFormat: Text.PlainText
                 }
             }
         }
@@ -215,51 +285,19 @@ Rectangle {
             App.upgrade(pkg.packageId, pkg.kind)
     }
 
-    Dialog {
+    YasDialog {
         id: confirmDialog
         property string operation: ""
-        anchors.centerIn: Overlay.overlay
-        modal: true
         title: qsTr("Confirm")
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        background: Rectangle {
-            color: Theme.surface; radius: Theme.radius; border.color: Theme.border
-        }
+        destructive: operation === "uninstall"
+        acceptText: operation === "uninstall" ? qsTr("Uninstall") : qsTr("Upgrade")
         Text {
             id: confirmText
             color: Theme.textPrimary
             font.family: Theme.uiFont
-            font.pixelSize: 13
+            font.pixelSize: Theme.fs(13)
         }
         onAccepted: root.runOperation(operation)
-    }
-
-    Dialog {
-        id: depsDialog
-        anchors.centerIn: Overlay.overlay
-        modal: true
-        width: Math.min(560, root.width + 200)
-        height: 420
-        standardButtons: Dialog.Close
-
-        background: Rectangle {
-            color: Theme.surface; radius: Theme.radius; border.color: Theme.border
-        }
-
-        contentItem: Flickable {
-            clip: true
-            contentHeight: depsText.implicitHeight
-            ScrollBar.vertical: ScrollBar {}
-            Text {
-                id: depsText
-                width: parent.width
-                color: Theme.textPrimary
-                font.family: Theme.monoFont
-                font.pixelSize: 12
-                wrapMode: Text.WrapAnywhere
-                textFormat: Text.PlainText
-            }
-        }
     }
 
     Connections {
@@ -273,8 +311,8 @@ Rectangle {
         function onActionOutputReady(actionId, packageId, stdOut, ok) {
             if ((actionId === "deps" || actionId === "depends")
                 && root.hasPackage && packageId === root.pkg.packageId) {
-                depsText.text = stdOut.length > 0 ? stdOut
-                                                  : qsTr("No dependencies reported")
+                root.depsOutput = stdOut.length > 0 ? stdOut
+                                                    : qsTr("No dependencies reported")
             }
         }
     }

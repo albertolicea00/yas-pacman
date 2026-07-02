@@ -52,7 +52,7 @@ Item {
                     text: root.title
                     color: Theme.textPrimary
                     font.family: Theme.headingFont
-                    font.pixelSize: 18
+                    font.pixelSize: Theme.fs(18)
                     font.weight: Font.Bold
                 }
                 IconButton {
@@ -68,7 +68,7 @@ Item {
             Row {
                 width: parent.width
                 spacing: 6
-                visible: searchField.visible
+                visible: root.placeholder.length > 0
 
                 SearchBar {
                     id: searchField
@@ -128,7 +128,7 @@ Item {
                                   + " " + modelData.count
                             color: parent.active ? Theme.accent : Theme.textSecondary
                             font.family: Theme.uiFont
-                            font.pixelSize: 11
+                            font.pixelSize: Theme.fs(11)
                         }
                         TapHandler {
                             onTapped: root.model.kindFilter = modelData.kind
@@ -171,7 +171,7 @@ Item {
             visible: list.count === 0 && root.emptyContent === null
             color: Theme.textSecondary
             font.family: Theme.uiFont
-            font.pixelSize: 13
+            font.pixelSize: Theme.fs(13)
         }
     }
 

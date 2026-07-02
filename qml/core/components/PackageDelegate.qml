@@ -12,6 +12,7 @@ ItemDelegate {
     required property string version
     required property string installedVersion
     required property string description
+    required property string homepage
     required property string kind
     required property bool pinned
     required property bool installed
@@ -20,7 +21,7 @@ ItemDelegate {
     property bool selected: false
 
     width: ListView.view ? ListView.view.width : implicitWidth
-    height: 58
+    height: Theme.fs(58)
 
     background: Rectangle {
         radius: Math.max(4, Theme.radius - 4)
@@ -34,22 +35,40 @@ ItemDelegate {
     contentItem: Row {
         spacing: 10
 
-        Rectangle { // initial avatar
-            width: 34; height: 34; radius: 17
+        Rectangle { // favicon with initial fallback
+            width: Theme.fs(34); height: Theme.fs(34); radius: Theme.fs(17)
             anchors.verticalCenter: parent.verticalCenter
             color: Theme.accentSubtle
+            clip: true
             Text {
                 anchors.centerIn: parent
+                visible: rowFavicon.status !== Image.Ready
                 text: control.name.length > 0 ? control.name.charAt(0).toUpperCase() : "?"
                 color: Theme.accent
                 font.family: Theme.uiFont
-                font.pixelSize: 15
+                font.pixelSize: Theme.fs(15)
                 font.weight: Font.Bold
+            }
+            Image {
+                id: rowFavicon
+                anchors.fill: parent
+                anchors.margins: 5
+                fillMode: Image.PreserveAspectFit
+                asynchronous: true
+                visible: status === Image.Ready
+                source: {
+                    if (control.homepage.length === 0)
+                        return ""
+                    const host = control.homepage.split("/")[2] || ""
+                    return host.length > 0
+                           ? "https://www.google.com/s2/favicons?domain=" + host + "&sz=64"
+                           : ""
+                }
             }
         }
 
         Column {
-            width: parent.width - 34 - statusColumn.width - 20
+            width: parent.width - Theme.fs(34) - statusColumn.width - 20
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
 
@@ -58,7 +77,7 @@ ItemDelegate {
                 text: control.name
                 color: Theme.textPrimary
                 font.family: Theme.uiFont
-                font.pixelSize: 13
+                font.pixelSize: Theme.fs(13)
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
@@ -68,7 +87,7 @@ ItemDelegate {
                 text: control.description.length > 0 ? control.description : control.packageId
                 color: Theme.textSecondary
                 font.family: Theme.uiFont
-                font.pixelSize: 11
+                font.pixelSize: Theme.fs(11)
                 elide: Text.ElideRight
             }
         }
@@ -84,7 +103,7 @@ ItemDelegate {
                                                           : control.version
                 color: Theme.textSecondary
                 font.family: Theme.monoFont
-                font.pixelSize: 10
+                font.pixelSize: Theme.fs(10)
             }
             Row {
                 anchors.right: parent.right

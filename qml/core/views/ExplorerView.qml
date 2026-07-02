@@ -5,7 +5,6 @@ import Yas.Core
 // search returns results.
 PackageBrowser {
     id: explorer
-    title: qsTr("Explore")
     model: App.searchModel
     placeholder: qsTr("Search packages (press Enter)")
     emptyText: qsTr("Search to explore available packages")

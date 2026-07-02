@@ -14,7 +14,7 @@ Column {
         text: qsTr("Actions — full %1 toolbox").arg(App.managerName)
         color: Theme.textPrimary
         font.family: Theme.headingFont
-        font.pixelSize: 16
+        font.pixelSize: Theme.fs(16)
         font.weight: Font.DemiBold
     }
 
@@ -54,7 +54,7 @@ Column {
                         text: modelData.title
                         color: Theme.textPrimary
                         font.family: Theme.uiFont
-                        font.pixelSize: 14
+                        font.pixelSize: Theme.fs(14)
                         font.weight: Font.DemiBold
                     }
                     TagBadge {
@@ -76,7 +76,7 @@ Column {
                           + (modelData.needsPackage ? " <pkg>" : "")
                     color: Theme.textSecondary
                     font.family: Theme.monoFont
-                    font.pixelSize: 11
+                    font.pixelSize: Theme.fs(11)
                     elide: Text.ElideRight
                 }
             }
@@ -100,13 +100,12 @@ Column {
         }
     }
 
-    Dialog {
+    YasDialog {
         id: confirmDialog
         property string actionId: ""
-        anchors.centerIn: Overlay.overlay
-        modal: true
         title: qsTr("Confirm")
-        standardButtons: Dialog.Ok | Dialog.Cancel
+        destructive: true
+        acceptText: qsTr("Run")
 
         function openFor(id, name) {
             actionId = id
@@ -114,14 +113,11 @@ Column {
             open()
         }
 
-        background: Rectangle {
-            color: Theme.surface; radius: Theme.radius; border.color: Theme.border
-        }
         Text {
             id: confirmText
             color: Theme.textPrimary
             font.family: Theme.uiFont
-            font.pixelSize: 13
+            font.pixelSize: Theme.fs(13)
         }
         onAccepted: App.runAction(actionId, root.packageForActions)
     }

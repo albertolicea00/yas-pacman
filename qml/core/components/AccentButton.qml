@@ -14,7 +14,7 @@ Button {
         color: control.subtle ? control.mainColor
                               : (control.enabled ? "#141420" : Theme.textSecondary)
         font.family: Theme.uiFont
-        font.pixelSize: 13
+        font.pixelSize: Theme.fs(13)
         font.weight: Font.DemiBold
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

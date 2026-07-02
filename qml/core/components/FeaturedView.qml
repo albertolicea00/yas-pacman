@@ -60,7 +60,7 @@ Flickable {
             text: qsTr("Discover")
             color: Theme.textPrimary
             font.family: Theme.headingFont
-            font.pixelSize: 16
+            font.pixelSize: Theme.fs(16)
             font.weight: Font.Bold
         }
 
@@ -75,7 +75,7 @@ Flickable {
                     text: modelData.name
                     color: Theme.textSecondary
                     font.family: Theme.uiFont
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.fs(12)
                     font.weight: Font.DemiBold
                     font.letterSpacing: 1
                 }
@@ -108,7 +108,7 @@ Flickable {
                                         text: modelData.name.charAt(0).toUpperCase()
                                         color: Theme.accent
                                         font.family: Theme.uiFont
-                                        font.pixelSize: 15
+                                        font.pixelSize: Theme.fs(15)
                                         font.weight: Font.Bold
                                     }
                                 }
@@ -122,7 +122,7 @@ Flickable {
                                         text: modelData.name
                                         color: Theme.textPrimary
                                         font.family: Theme.uiFont
-                                        font.pixelSize: 13
+                                        font.pixelSize: Theme.fs(13)
                                         font.weight: Font.DemiBold
                                         elide: Text.ElideRight
                                     }
@@ -131,7 +131,7 @@ Flickable {
                                         text: modelData.description || modelData.id
                                         color: Theme.textSecondary
                                         font.family: Theme.uiFont
-                                        font.pixelSize: 11
+                                        font.pixelSize: Theme.fs(11)
                                         elide: Text.ElideRight
                                     }
                                 }

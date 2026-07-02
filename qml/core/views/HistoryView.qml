@@ -10,14 +10,6 @@ Column {
         width: parent.width
         spacing: Theme.spacing
 
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: qsTr("Command history (%1)").arg(App.commandLog.count)
-            color: Theme.textPrimary
-            font.family: Theme.headingFont
-            font.pixelSize: 16
-            font.weight: Font.DemiBold
-        }
         IconButton {
             icon: "⌫"
             label: qsTr("Clear history")
@@ -56,7 +48,7 @@ Column {
                     color: model.running ? Theme.accent
                                          : model.succeeded ? Theme.textPrimary : Theme.danger
                     font.family: Theme.monoFont
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.fs(12)
                     elide: Text.ElideMiddle
                 }
                 Text {
@@ -66,7 +58,7 @@ Column {
                                                  .arg(model.exitCode).arg(model.durationMs))
                     color: Theme.textSecondary
                     font.family: Theme.uiFont
-                    font.pixelSize: 10
+                    font.pixelSize: Theme.fs(10)
                 }
             }
 

@@ -52,14 +52,14 @@ Rectangle {
             Text {
                 text: root.expanded ? "▾" : "▸"
                 color: Theme.textSecondary
-                font.pixelSize: 12
+                font.pixelSize: Theme.fs(12)
                 anchors.verticalCenter: parent.verticalCenter
             }
             Text {
                 text: qsTr("Terminal")
                 color: Theme.textPrimary
                 font.family: Theme.uiFont
-                font.pixelSize: 12
+                font.pixelSize: Theme.fs(12)
                 font.weight: Font.DemiBold
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -70,7 +70,7 @@ Rectangle {
                          ? qsTr(" (+%1 queued)").arg(App.queue.pendingCount) : "")
                 color: Theme.accent
                 font.family: Theme.monoFont
-                font.pixelSize: 11
+                font.pixelSize: Theme.fs(11)
                 anchors.verticalCenter: parent.verticalCenter
             }
             BusyIndicator {
@@ -127,7 +127,7 @@ Rectangle {
             color: model.error ? Theme.danger
                                : model.line.startsWith("$ ") ? Theme.accent : Theme.textSecondary
             font.family: Theme.monoFont
-            font.pixelSize: 12
+            font.pixelSize: Theme.fs(12)
             wrapMode: Text.WrapAnywhere
             textFormat: Text.PlainText
         }

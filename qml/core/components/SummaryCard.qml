@@ -30,7 +30,7 @@ Rectangle {
             Text {
                 id: iconGlyph
                 anchors.centerIn: parent
-                font.pixelSize: 19
+                font.pixelSize: Theme.fs(19)
                 color: Theme.accent
             }
         }
@@ -46,7 +46,7 @@ Rectangle {
                 text: root.title
                 color: Theme.textPrimary
                 font.family: Theme.uiFont
-                font.pixelSize: 14
+                font.pixelSize: Theme.fs(14)
                 font.weight: Font.DemiBold
                 wrapMode: Text.WordWrap
             }
@@ -56,7 +56,7 @@ Rectangle {
                 text: root.subtitle
                 color: Theme.textSecondary
                 font.family: Theme.uiFont
-                font.pixelSize: 12
+                font.pixelSize: Theme.fs(12)
                 wrapMode: Text.WordWrap
             }
         }

@@ -16,7 +16,7 @@ Rectangle {
         anchors.centerIn: parent
         color: parent.tint
         font.family: Theme.uiFont
-        font.pixelSize: 11
+        font.pixelSize: Theme.fs(11)
         font.weight: Font.DemiBold
         font.letterSpacing: 1
     }

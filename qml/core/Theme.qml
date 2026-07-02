@@ -21,13 +21,16 @@ QtObject {
     property color success: dark ? "#9ECE6A" : "#3E7B27"
     property string tag: "YAS"
 
+    // UI scale (Settings): multiplies font sizes and key element heights.
+    property real scale: 1.0
+    function fs(size) { return Math.round(size * scale) }
+
     // Platform flavor: corner rounding follows the design language of the OS
     // the app runs on (macOS soft, Windows Fluent-square, Linux in-between).
     readonly property string os: Qt.platform.os
     property int radius: os === "osx" ? 10 : os === "windows" ? 4 : 6
     property int spacing: 12
-    property int railWidth: 56
-    property int listPanelWidth: 340
+    property int railWidth: Math.round(56 * scale)
 
     property string headingFont: "Outfit"
     property string uiFont: "Inter"

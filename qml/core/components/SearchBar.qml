@@ -6,12 +6,12 @@ Rectangle {
     id: root
     property alias text: field.text
     property alias placeholder: field.placeholderText
-    property alias bg: root.color
+    property color bg: Theme.surface
     signal accepted(string query)
 
-    implicitHeight: 36
+    implicitHeight: Theme.fs(36)
     radius: Theme.radius
-    color: Theme.surface
+    color: root.bg
     border.color: field.activeFocus ? Theme.accent : Theme.border
 
     Row {
@@ -24,7 +24,7 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             text: "⌕"
             color: Theme.textSecondary
-            font.pixelSize: 16
+            font.pixelSize: Theme.fs(16)
         }
 
         TextField {
@@ -34,7 +34,7 @@ Rectangle {
             color: Theme.textPrimary
             placeholderTextColor: Theme.textSecondary
             font.family: Theme.uiFont
-            font.pixelSize: 13
+            font.pixelSize: Theme.fs(13)
             background: null
             onAccepted: root.accepted(text)
         }

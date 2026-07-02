@@ -45,6 +45,11 @@ public:
     Q_INVOKABLE void initialize();
     Q_INVOKABLE void redetectCli();
 
+    // Disk cache (installed/outdated lists + package details): the UI paints
+    // instantly from the last known state, then live refreshes overwrite it.
+    Q_INVOKABLE void clearCache();
+    Q_INVOKABLE QString cacheSizeText() const;
+
     Q_INVOKABLE void search(const QString &query);
     Q_INVOKABLE void requestInfo(const QString &packageId, const QString &kind);
     Q_INVOKABLE void refreshInstalled();
@@ -81,6 +86,12 @@ private:
     void refreshAll();
     void annotateInstalled(QList<Package> &packages) const;
 
+    QString cacheDir() const;
+    void saveListCache(const QString &name, const QList<Package> &packages) const;
+    QList<Package> loadListCache(const QString &name) const;
+    void loadDetailsCache();
+    void saveDetailsCache() const;
+
     PackageManagerAdapter *m_adapter;
     ProcessRunner m_runner;
     CommandLog m_log;
@@ -89,6 +100,8 @@ private:
     PackageListModel m_installedModel;
     PackageListModel m_outdatedModel;
     QHash<QString, Package> m_installedIndex;
+    QHash<QString, QVariantMap> m_detailsCache;
+    bool m_detailsCacheLoaded = false;
     CliInfo m_cli;
 };
 

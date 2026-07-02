@@ -48,6 +48,11 @@ ApplicationWindow {
         property: "dark"
         value: YasManager.darkMode
     }
+    Binding {
+        target: Theme
+        property: "scale"
+        value: YasManager.uiScale
+    }
 
     // ---- Icon rail (Teams-style) -----------------------------------------
     Rectangle {
@@ -91,7 +96,7 @@ ApplicationWindow {
                     required property var modelData
                     required property int index
                     width: Theme.railWidth
-                    height: 52
+                    height: Math.round(52 * Theme.scale)
 
                     Rectangle { // active indicator
                         visible: stack.currentIndex === index
@@ -106,7 +111,7 @@ ApplicationWindow {
                         spacing: 1
                         Text {
                             text: modelData.icon
-                            font.pixelSize: 17
+                            font.pixelSize: Theme.fs(17)
                             color: stack.currentIndex === index ? Theme.accent
                                                                 : Theme.textSecondary
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -114,7 +119,7 @@ ApplicationWindow {
                         Text {
                             text: modelData.label
                             font.family: Theme.uiFont
-                            font.pixelSize: 9
+                            font.pixelSize: Theme.fs(9)
                             color: stack.currentIndex === index ? Theme.textPrimary
                                                                 : Theme.textSecondary
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -135,7 +140,7 @@ ApplicationWindow {
                             anchors.centerIn: parent
                             text: App.outdatedModel.count
                             color: "#FFFFFF"
-                            font.pixelSize: 9
+                            font.pixelSize: Theme.fs(9)
                             font.weight: Font.Bold
                         }
                     }
@@ -154,36 +159,6 @@ ApplicationWindow {
             }
         }
 
-        // Light/dark toggle pinned to the bottom of the rail.
-        Item {
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: Theme.railWidth
-            height: 40
-
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: 4
-                radius: Theme.radius
-                color: themeHover.hovered ? Theme.surfaceAlt : "transparent"
-            }
-            Text {
-                anchors.centerIn: parent
-                text: YasManager.themeMode === "auto" ? "◐"
-                      : YasManager.themeMode === "light" ? "☀" : "☾"
-                font.pixelSize: 16
-                color: Theme.textSecondary
-            }
-            HoverHandler { id: themeHover }
-            TapHandler { onTapped: YasManager.cycleThemeMode() }
-            ToolTip.visible: themeHover.hovered
-            ToolTip.text: YasManager.themeMode === "auto"
-                          ? qsTr("Theme: auto (follows the system)")
-                          : YasManager.themeMode === "light" ? qsTr("Theme: light")
-                                                             : qsTr("Theme: dark")
-            ToolTip.delay: 400
-        }
     }
 
     // ---- CLI-missing banner -----------------------------------------------
@@ -204,7 +179,7 @@ ApplicationWindow {
                       .arg(App.managerName)
             color: Theme.danger
             font.family: Theme.uiFont
-            font.pixelSize: 13
+            font.pixelSize: Theme.fs(13)
         }
     }
 
@@ -268,7 +243,7 @@ ApplicationWindow {
             anchors.centerIn: parent
             color: "#FFFFFF"
             font.family: Theme.uiFont
-            font.pixelSize: 13
+            font.pixelSize: Theme.fs(13)
             font.weight: Font.DemiBold
         }
         Timer {

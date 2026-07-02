@@ -24,7 +24,7 @@ Flickable {
             text: parent.heading
             color: Theme.textPrimary
             font.family: Theme.uiFont
-            font.pixelSize: 14
+            font.pixelSize: Theme.fs(14)
             font.weight: Font.DemiBold
         }
         Column {
@@ -47,7 +47,7 @@ Flickable {
             text: qsTr("Settings")
             color: Theme.textPrimary
             font.family: Theme.headingFont
-            font.pixelSize: 24
+            font.pixelSize: Theme.fs(24)
             font.weight: Font.Bold
         }
 
@@ -77,7 +77,7 @@ Flickable {
                             text: modelData.icon + "  " + modelData.label
                             color: parent.active ? Theme.accent : Theme.textSecondary
                             font.family: Theme.uiFont
-                            font.pixelSize: 12
+                            font.pixelSize: Theme.fs(12)
                         }
                         TapHandler { onTapped: YasManager.themeMode = modelData.mode }
                     }
@@ -87,7 +87,68 @@ Flickable {
                 text: qsTr("Auto follows the system appearance")
                 color: Theme.textSecondary
                 font.family: Theme.uiFont
-                font.pixelSize: 11
+                font.pixelSize: Theme.fs(11)
+            }
+
+            Item { width: 1; height: 4 }
+
+            Text {
+                text: qsTr("Text and element size")
+                color: Theme.textPrimary
+                font.family: Theme.uiFont
+                font.pixelSize: Theme.fs(13)
+            }
+            Row {
+                spacing: 8
+                Repeater {
+                    model: [
+                        { scale: 1.0,  label: qsTr("Normal") },
+                        { scale: 1.15, label: qsTr("Large") },
+                        { scale: 1.3,  label: qsTr("Extra large") },
+                    ]
+                    delegate: Rectangle {
+                        required property var modelData
+                        readonly property bool active:
+                            Math.abs(YasManager.uiScale - modelData.scale) < 0.01
+                        width: scaleLabel.implicitWidth + 30
+                        height: 30
+                        radius: Theme.radius
+                        color: active ? Theme.accentSubtle : Theme.base
+                        border.color: active ? Theme.accent : Theme.border
+
+                        Text {
+                            id: scaleLabel
+                            anchors.centerIn: parent
+                            text: modelData.label
+                            color: parent.active ? Theme.accent : Theme.textSecondary
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fs(12)
+                        }
+                        TapHandler { onTapped: YasManager.uiScale = modelData.scale }
+                    }
+                }
+            }
+        }
+
+        SectionCard {
+            heading: qsTr("Cache")
+
+            Text {
+                width: parent.width
+                text: qsTr("Installed, updates and package details are cached on disk so the app paints instantly; live refreshes overwrite the cache. Current size: %1").arg(App.cacheSizeText())
+                color: Theme.textSecondary
+                font.family: Theme.uiFont
+                font.pixelSize: Theme.fs(11)
+                wrapMode: Text.WordWrap
+            }
+            Row {
+                spacing: 4
+                IconButton {
+                    icon: "⌫"
+                    label: qsTr("Clear cache")
+                    tint: Theme.danger
+                    onClicked: App.clearCache()
+                }
             }
         }
 
@@ -131,7 +192,7 @@ Flickable {
                     text: qsTr("Featured source URL (empty = bundled defaults)")
                     color: Theme.textSecondary
                     font.family: Theme.uiFont
-                    font.pixelSize: 11
+                    font.pixelSize: Theme.fs(11)
                 }
                 Rectangle {
                     width: parent.width
@@ -148,7 +209,7 @@ Flickable {
                         placeholderTextColor: Theme.textSecondary
                         color: Theme.textPrimary
                         font.family: Theme.monoFont
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fs(12)
                         background: null
                         onEditingFinished: YasManager.featuredUrl = text
                     }
@@ -187,7 +248,7 @@ Flickable {
                             .arg(App.managerName)
                 color: App.cliAvailable ? Theme.success : Theme.danger
                 font.family: Theme.monoFont
-                font.pixelSize: 12
+                font.pixelSize: Theme.fs(12)
                 wrapMode: Text.WrapAnywhere
             }
             Text {
@@ -195,7 +256,7 @@ Flickable {
                 text: App.cliVersion
                 color: Theme.textSecondary
                 font.family: Theme.monoFont
-                font.pixelSize: 12
+                font.pixelSize: Theme.fs(12)
             }
             Row {
                 spacing: 4
