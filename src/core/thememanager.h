@@ -6,25 +6,32 @@
 namespace yas {
 
 // Persists UI preferences (QSettings, per-app scope). Exposed to QML as the
-// `YasManager` context property; YasAppWindow binds Theme.dark to darkMode.
-// Vendored per repo like the rest of the core — no shared package.
+// `YasManager` context property. Theme mode: "auto" follows the OS color
+// scheme live; "light"/"dark" force one. Vendored per repo like the core.
 class ThemeManager : public QObject {
     Q_OBJECT
-    Q_PROPERTY(bool darkMode READ darkMode WRITE setDarkMode NOTIFY darkModeChanged)
+    Q_PROPERTY(QString themeMode READ themeMode WRITE setThemeMode NOTIFY themeModeChanged)
+    Q_PROPERTY(bool darkMode READ darkMode NOTIFY darkModeChanged)
 public:
     explicit ThemeManager(QObject *parent = nullptr);
 
-    bool darkMode() const { return m_darkMode; }
-    void setDarkMode(bool dark);
+    QString themeMode() const { return m_mode; }
+    void setThemeMode(const QString &mode); // "auto" | "light" | "dark"
 
-    Q_INVOKABLE void toggleDarkMode() { setDarkMode(!m_darkMode); }
+    bool darkMode() const;
+
+    // auto -> light -> dark -> auto
+    Q_INVOKABLE void cycleThemeMode();
 
 signals:
+    void themeModeChanged();
     void darkModeChanged();
 
 private:
+    bool systemPrefersDark() const;
+
     QSettings m_settings;
-    bool m_darkMode = true;
+    QString m_mode;
 };
 
 } // namespace yas

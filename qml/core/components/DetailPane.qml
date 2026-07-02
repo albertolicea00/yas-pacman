@@ -3,14 +3,13 @@ import QtQuick.Controls.Basic
 import Yas.Core
 
 // Right-hand pane showing the selected package + every operation on it.
+// Flat (Teams-style): sits directly on the window base color.
 Rectangle {
     id: root
     property var pkg: ({})  // QVariantMap from PackageListModel.get / infoReady
     readonly property bool hasPackage: pkg && pkg.packageId !== undefined
 
-    color: Theme.surface
-    radius: Theme.radius
-    border.color: Theme.border
+    color: "transparent"
 
     Text {
         anchors.centerIn: parent
@@ -24,7 +23,7 @@ Rectangle {
     Column {
         visible: root.hasPackage
         anchors.fill: parent
-        anchors.margins: 16
+        anchors.margins: 24
         spacing: 10
 
         Text {

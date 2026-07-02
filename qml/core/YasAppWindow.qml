@@ -169,14 +169,18 @@ ApplicationWindow {
             }
             Text {
                 anchors.centerIn: parent
-                text: Theme.dark ? "☀" : "☾"
+                text: YasManager.themeMode === "auto" ? "◐"
+                      : YasManager.themeMode === "light" ? "☀" : "☾"
                 font.pixelSize: 16
                 color: Theme.textSecondary
             }
             HoverHandler { id: themeHover }
-            TapHandler { onTapped: YasManager.toggleDarkMode() }
+            TapHandler { onTapped: YasManager.cycleThemeMode() }
             ToolTip.visible: themeHover.hovered
-            ToolTip.text: Theme.dark ? qsTr("Light mode") : qsTr("Dark mode")
+            ToolTip.text: YasManager.themeMode === "auto"
+                          ? qsTr("Theme: auto (follows the system)")
+                          : YasManager.themeMode === "light" ? qsTr("Theme: light")
+                                                             : qsTr("Theme: dark")
             ToolTip.delay: 400
         }
     }
@@ -210,14 +214,14 @@ ApplicationWindow {
         anchors.left: rail.right
         anchors.right: parent.right
         anchors.bottom: terminal.top
-        anchors.margins: Theme.spacing
 
+        // Package sections are flush (Teams panels); tool sections get padding.
         ExplorerView {}
         InstalledView {}
         UpdatesView {}
-        ActionsView {}
-        HistoryView {}
-        SettingsView {}
+        Item { ActionsView { anchors.fill: parent; anchors.margins: 16 } }
+        Item { HistoryView { anchors.fill: parent; anchors.margins: 16 } }
+        Item { SettingsView { anchors.fill: parent; anchors.margins: 16 } }
 
         Repeater {
             model: window.extraViews

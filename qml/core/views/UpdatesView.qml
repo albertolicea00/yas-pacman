@@ -2,6 +2,7 @@ import QtQuick
 import Yas.Core
 
 PackageBrowser {
+    title: qsTr("Updates")
     model: App.outdatedModel
     emptyText: qsTr("Everything is up to date")
     headerExtra: [
