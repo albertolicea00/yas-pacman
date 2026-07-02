@@ -26,19 +26,14 @@ This application is an unofficial graphical frontend. It runs standard CLI comma
 
 ## 🧑‍💻 Building from source
 
-> **Status**: the code scaffold is rolling out across the suite (yas-brew first).
-> The commands below are the standard YAS build flow and will work as soon as
-> the scaffold lands in this repository.
 
 ```bash
 git clone https://github.com/albertolicea00/yas-pacman.git
 cd yas-pacman
-cmake --preset default        # configure (Ninja, Debug)
-cmake --build --preset default
-./build/default/yas-pacman
+make run     # configure + build + launch
 ```
 
-Run the test suite with `ctest --preset default`. Release build: swap `default` for `release`. Full setup details → [CONTRIBUTING.md](CONTRIBUTING.md).
+Other targets: `make test` · `make release` · `make clean` · `make help` (full list). Prefer raw CMake? `cmake --preset default && cmake --build --preset default`. Full setup details → [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## 🤝 Contributing
 

@@ -9,8 +9,8 @@ The design is built around a modern, premium Dark Theme featuring a deep store b
 ### Color Tokens
 
 - **Store Base Color (Dark Gray)**:
-  - Hex: `#1E1E2E`
-  - HSL: `hsl(240, 21%, 15%)`
+  - Hex: `#212826`
+  - HSL: `hsl(163, 10%, 14%)`
 - **Accent Color (Orange)**:
   - Hex: `#FF5722`
   - HSL: `hsl(14, 100%, 57%)`
@@ -19,7 +19,7 @@ The design is built around a modern, premium Dark Theme featuring a deep store b
 - **Text Primary**:
   - Hex: `#F8F8F2`
 - **Text Secondary**:
-  - Hex: `#A9B1D6`
+  - Hex: `#ACADAD`
 
 ## Visual Assets & Logo Concept
 
