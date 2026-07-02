@@ -21,12 +21,12 @@ ApplicationWindow {
     property var extraViews: []
 
     readonly property var baseNav: [
-        { label: qsTr("Home"),      icon: "⌂" },
+        { label: qsTr("Home"),      icon: "☖" },
         { label: qsTr("Explore"),   icon: "⌕" },
-        { label: qsTr("Installed"), icon: "▤" },
+        { label: qsTr("Installed"), icon: "▣" },
         { label: qsTr("Updates"),   icon: "↺" },
         { label: qsTr("Actions"),   icon: "⚙" },
-        { label: qsTr("Settings"),  icon: "✦" },
+        { label: qsTr("Settings"),  icon: "⛭" },
     ]
     readonly property int historyIndex: 6 + extraViews.length
     readonly property bool railOpen: YasManager.railExpanded
@@ -57,7 +57,7 @@ ApplicationWindow {
         width: window.railOpen ? Math.round(190 * Theme.scale) : Theme.railWidth
         anchors.top: parent.top
         anchors.bottom: terminal.top
-        color: Theme.surface
+        color: Theme.rail
         Behavior on width { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
 
         Rectangle { // separator against content
@@ -259,7 +259,7 @@ ApplicationWindow {
         anchors.bottom: terminal.top
 
         Rectangle {
-            color: Theme.surface
+            color: Theme.rail
             HomeView {
                 anchors.fill: parent
                 anchors.margins: 20

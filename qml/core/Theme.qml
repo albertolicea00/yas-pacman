@@ -9,6 +9,7 @@ QtObject {
     // Backgrounds — OS-neutral grays, one palette per mode.
     property color base: dark ? "#222629" : "#F4F5F6"
     property color surface: dark ? "#2D3032" : "#FFFFFF"
+    property color rail: dark ? "#262B2E" : "#EDEFF0"
     property color surfaceAlt: dark ? "#383B3E" : "#EAECED"
     property color border: dark ? "#393C3B" : "#D8DADC"
     property color terminalBase: dark ? "#1A201E" : "#E9EBEC"
