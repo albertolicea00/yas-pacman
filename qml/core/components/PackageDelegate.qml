@@ -41,7 +41,8 @@ ItemDelegate {
             Text {
                 anchors.centerIn: parent
                 visible: rowFavicon.status !== Image.Ready
-                text: "🧩"
+                text: "❒"
+                color: Theme.textSecondary
                 font.pixelSize: Theme.fs(20)
             }
             Image {

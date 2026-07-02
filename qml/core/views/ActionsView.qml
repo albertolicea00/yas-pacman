@@ -10,14 +10,6 @@ Column {
 
     property string packageForActions: ""
 
-    Text {
-        text: qsTr("Actions — full %1 toolbox").arg(App.managerName)
-        color: Theme.textPrimary
-        font.family: Theme.headingFont
-        font.pixelSize: Theme.fs(16)
-        font.weight: Font.DemiBold
-    }
-
     SearchBar {
         id: pkgField
         width: parent.width

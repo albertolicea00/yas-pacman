@@ -5,7 +5,7 @@ import Yas.Core
 Flickable {
     id: root
     signal openHistory()
-    contentHeight: content.height + 20
+    contentHeight: content.height + 60
     clip: true
     ScrollBar.vertical: ScrollBar {}
 
@@ -43,14 +43,6 @@ Flickable {
         id: content
         width: root.width
         spacing: 12
-
-        Text {
-            text: qsTr("Settings")
-            color: Theme.textPrimary
-            font.family: Theme.headingFont
-            font.pixelSize: Theme.fs(24)
-            font.weight: Font.Bold
-        }
 
         SectionCard {
             heading: qsTr("Appearance")
@@ -173,6 +165,42 @@ Flickable {
                 description: qsTr("Second line in list rows")
                 checked: YasManager.showDescriptions
                 onToggled: checked => YasManager.showDescriptions = checked
+            }
+
+            Item { width: 1; height: 4 }
+
+            Text {
+                text: qsTr("Default package type in Installed")
+                color: Theme.textPrimary
+                font.family: Theme.uiFont
+                font.pixelSize: Theme.fs(13)
+            }
+            Flow {
+                width: parent.width
+                spacing: 8
+                Repeater {
+                    model: [{kind: ""}].concat(App.installedModel.kindSummary)
+                    delegate: Rectangle {
+                        required property var modelData
+                        readonly property bool active:
+                            YasManager.defaultKind === modelData.kind
+                        width: kindLabel.implicitWidth + 26
+                        height: 28
+                        radius: Theme.radius
+                        color: active ? Theme.accentSubtle : Theme.base
+                        border.color: active ? Theme.accent : Theme.border
+
+                        Text {
+                            id: kindLabel
+                            anchors.centerIn: parent
+                            text: modelData.kind.length > 0 ? modelData.kind : qsTr("all")
+                            color: parent.active ? Theme.accent : Theme.textSecondary
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fs(12)
+                        }
+                        TapHandler { onTapped: YasManager.defaultKind = modelData.kind }
+                    }
+                }
             }
         }
 

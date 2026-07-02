@@ -62,7 +62,8 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     visible: favicon.status !== Image.Ready
-                    text: "🧩"
+                    text: "❒"
+                color: Theme.textSecondary
                     font.pixelSize: Theme.fs(24)
                 }
                 Image {

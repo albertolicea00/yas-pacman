@@ -4,9 +4,8 @@ import Yas.Core
 
 // Teams-style list + detail. The list takes the full width until a package
 // is selected; then the detail pane opens on the right (~5/12) and can be
-// closed again from its ✕ button. Optional integrated refresh icon next to
-// the search bar and a custom empty-state component (used by the Explore
-// storefront).
+// closed again from its ✕ button. Kind filter chips sit left on the same
+// line as the section action buttons (headerExtra, right).
 Item {
     id: root
     property alias model: list.model
@@ -44,11 +43,11 @@ Item {
             Row {
                 width: parent.width
                 spacing: 6
+                visible: root.title.length > 0 || (root.showRefresh && root.placeholder.length === 0)
 
                 Text {
                     visible: root.title.length > 0
-                    width: parent.width - (refreshTitleBtn.visible && !searchField.visible
-                                           ? refreshTitleBtn.width + 6 : 0)
+                    width: parent.width - (refreshTitleBtn.visible ? refreshTitleBtn.width + 6 : 0)
                     text: root.title
                     color: Theme.textPrimary
                     font.family: Theme.headingFont
@@ -57,7 +56,7 @@ Item {
                 }
                 IconButton {
                     id: refreshTitleBtn
-                    visible: root.showRefresh && !searchField.visible
+                    visible: root.showRefresh && root.placeholder.length === 0
                     icon: "↻"
                     tooltip: qsTr("Refresh")
                     anchors.verticalCenter: parent.verticalCenter
@@ -90,50 +89,60 @@ Item {
                 }
             }
 
-            Row {
-                id: extraRow
+            // Kind filter chips (left) + section action buttons (right).
+            Item {
                 width: parent.width
-                spacing: 8
-                visible: children.length > 0
-            }
+                height: Math.max(chipsFlow.implicitHeight, extraRow.implicitHeight)
+                visible: chipsFlow.visible || extraRow.children.length > 0
 
-            // Kind filter chips (formula/cask, app/runtime, repo/aur...).
-            Flow {
-                width: parent.width
-                spacing: 6
-                visible: root.model && root.model.kindSummary !== undefined
-                         && root.model.kindSummary.length > 1
+                Flow {
+                    id: chipsFlow
+                    anchors.left: parent.left
+                    anchors.right: extraRow.left
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 6
+                    visible: root.model && root.model.kindSummary !== undefined
+                             && root.model.kindSummary.length > 1
 
-                Repeater {
-                    model: (root.model && root.model.kindSummary !== undefined
-                            && root.model.kindSummary.length > 1)
-                           ? [{kind: "", count: root.model.totalCount}].concat(
-                                 root.model.kindSummary)
-                           : []
-                    delegate: Rectangle {
-                        required property var modelData
-                        readonly property bool active:
-                            root.model.kindFilter === modelData.kind
-                        width: chipLabel.implicitWidth + 18
-                        height: 24
-                        radius: 12
-                        color: active ? Theme.accentSubtle : Theme.base
-                        border.color: active ? Theme.accent : Theme.border
+                    Repeater {
+                        model: (root.model && root.model.kindSummary !== undefined
+                                && root.model.kindSummary.length > 1)
+                               ? [{kind: "", count: root.model.totalCount}].concat(
+                                     root.model.kindSummary)
+                               : []
+                        delegate: Rectangle {
+                            required property var modelData
+                            readonly property bool active:
+                                root.model.kindFilter === modelData.kind
+                            width: chipLabel.implicitWidth + 18
+                            height: 24
+                            radius: 12
+                            color: active ? Theme.accentSubtle : Theme.base
+                            border.color: active ? Theme.accent : Theme.border
 
-                        Text {
-                            id: chipLabel
-                            anchors.centerIn: parent
-                            text: (modelData.kind.length > 0 ? modelData.kind
-                                                             : qsTr("all"))
-                                  + " " + modelData.count
-                            color: parent.active ? Theme.accent : Theme.textSecondary
-                            font.family: Theme.uiFont
-                            font.pixelSize: Theme.fs(11)
-                        }
-                        TapHandler {
-                            onTapped: root.model.kindFilter = modelData.kind
+                            Text {
+                                id: chipLabel
+                                anchors.centerIn: parent
+                                text: (modelData.kind.length > 0 ? modelData.kind
+                                                                 : qsTr("all"))
+                                      + " " + modelData.count
+                                color: parent.active ? Theme.accent : Theme.textSecondary
+                                font.family: Theme.uiFont
+                                font.pixelSize: Theme.fs(11)
+                            }
+                            TapHandler {
+                                onTapped: root.model.kindFilter = modelData.kind
+                            }
                         }
                     }
+                }
+
+                Row {
+                    id: extraRow
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 8
                 }
             }
 

@@ -27,6 +27,8 @@ ThemeManager::ThemeManager(QObject *parent)
     m_uiScale = m_settings.value(QStringLiteral("ui/scale"), 1.0).toDouble();
     if (m_uiScale < 0.8 || m_uiScale > 2.0)
         m_uiScale = 1.0;
+    m_railExpanded = m_settings.value(QStringLiteral("ui/railExpanded"), true).toBool();
+    m_defaultKind = m_settings.value(QStringLiteral("ui/defaultKind")).toString();
 
     // Follow the OS live while in auto mode (user flips system appearance).
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this,
@@ -130,6 +132,24 @@ void ThemeManager::setUiScale(double scale)
     m_uiScale = scale;
     m_settings.setValue(QStringLiteral("ui/scale"), scale);
     emit uiScaleChanged();
+}
+
+void ThemeManager::setRailExpanded(bool expanded)
+{
+    if (m_railExpanded == expanded)
+        return;
+    m_railExpanded = expanded;
+    m_settings.setValue(QStringLiteral("ui/railExpanded"), expanded);
+    emit railExpandedChanged();
+}
+
+void ThemeManager::setDefaultKind(const QString &kind)
+{
+    if (m_defaultKind == kind)
+        return;
+    m_defaultKind = kind;
+    m_settings.setValue(QStringLiteral("ui/defaultKind"), kind);
+    emit defaultKindChanged();
 }
 
 void ThemeManager::cycleThemeMode()

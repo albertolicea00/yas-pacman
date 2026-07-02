@@ -3,8 +3,8 @@ import QtQuick.Controls.Basic
 import QtQuick.Layouts
 import Yas.Core
 
-// Teams-style application shell shared by every YAS store: a slim icon rail,
-// then each section lays out its own list + detail panels. Requires the
+// Teams-style application shell shared by every YAS store: a collapsible
+// icon rail, then each section lays out its own panels. Requires the
 // `App` and `YasManager` context properties.
 ApplicationWindow {
     id: window
@@ -13,6 +13,9 @@ ApplicationWindow {
     property color accent: Theme.accent
     property string tag: "YAS"
     property url iconSource: ""
+    // Kind filter seeded into Installed on first run (e.g. "cask" for brew);
+    // the user's choice in Settings wins afterwards.
+    property string defaultKind: ""
     // Per-app manager-specific views appended to the rail.
     // Each entry: { label: string, icon: string, source: url of a .qml }
     property var extraViews: []
@@ -25,6 +28,8 @@ ApplicationWindow {
         { label: qsTr("Actions"),   icon: "⚙" },
         { label: qsTr("Settings"),  icon: "✦" },
     ]
+    readonly property int historyIndex: 6 + extraViews.length
+    readonly property bool railOpen: YasManager.railExpanded
 
     width: 1180
     height: 760
@@ -37,29 +42,23 @@ ApplicationWindow {
     Component.onCompleted: {
         Theme.accent = accent
         Theme.tag = tag
+        if (defaultKind.length > 0 && YasManager.defaultKind.length === 0)
+            YasManager.defaultKind = defaultKind
         if (App.cliAvailable)
             App.initialize()
     }
 
-    // Persisted light/dark mode (YasManager wraps QSettings).
-    Binding {
-        target: Theme
-        property: "dark"
-        value: YasManager.darkMode
-    }
-    Binding {
-        target: Theme
-        property: "scale"
-        value: YasManager.uiScale
-    }
+    Binding { target: Theme; property: "dark"; value: YasManager.darkMode }
+    Binding { target: Theme; property: "scale"; value: YasManager.uiScale }
 
-    // ---- Icon rail (Teams-style) -----------------------------------------
+    // ---- Collapsible icon rail ---------------------------------------------
     Rectangle {
         id: rail
-        width: Theme.railWidth
+        width: window.railOpen ? Math.round(190 * Theme.scale) : Theme.railWidth
         anchors.top: parent.top
         anchors.bottom: terminal.top
         color: Theme.surface
+        Behavior on width { NumberAnimation { duration: 130; easing.type: Easing.OutCubic } }
 
         Rectangle { // separator against content
             anchors.right: parent.right
@@ -71,46 +70,122 @@ ApplicationWindow {
         Column {
             anchors.top: parent.top
             anchors.topMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: parent.left
+            anchors.right: parent.right
             spacing: 4
 
-            Image {
-                visible: window.iconSource.toString().length > 0
-                source: window.iconSource
-                width: 30; height: 30
-                fillMode: Image.PreserveAspectFit
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-            TagBadge {
-                visible: window.iconSource.toString().length === 0
-                text: window.tag.substring(0, 4)
-                anchors.horizontalCenter: parent.horizontalCenter
+            // App icon + expand/collapse toggle.
+            Item {
+                width: parent.width
+                height: 40
+
+                Row {
+                    visible: window.railOpen
+                    anchors.left: parent.left
+                    anchors.leftMargin: 14
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 8
+
+                    Image {
+                        visible: window.iconSource.toString().length > 0
+                        source: window.iconSource
+                        width: 24; height: 24
+                        anchors.verticalCenter: parent.verticalCenter
+                        fillMode: Image.PreserveAspectFit
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("YAS for %1").arg(window.tag)
+                        color: Theme.textPrimary
+                        font.family: Theme.headingFont
+                        font.pixelSize: Theme.fs(14)
+                        font.weight: Font.Bold
+                    }
+                }
+
+                Item {
+                    width: Theme.railWidth
+                    height: parent.height
+                    anchors.right: parent.right
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 6
+                        radius: Theme.radius
+                        color: toggleHover.hovered ? Theme.surfaceAlt : "transparent"
+                    }
+                    Text {
+                        anchors.centerIn: parent
+                        text: window.railOpen ? "«" : "»"
+                        color: Theme.textSecondary
+                        font.pixelSize: Theme.fs(18)
+                    }
+                    HoverHandler { id: toggleHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler { onTapped: YasManager.railExpanded = !YasManager.railExpanded }
+                    ToolTip.visible: toggleHover.hovered
+                    ToolTip.text: window.railOpen ? qsTr("Collapse menu") : qsTr("Expand menu")
+                    ToolTip.delay: 450
+                }
             }
 
-            Item { width: 1; height: 10 }
+            Item { width: 1; height: 6 }
 
             Repeater {
                 model: window.baseNav.concat(window.extraViews)
                 delegate: Item {
                     required property var modelData
                     required property int index
-                    width: Theme.railWidth
-                    height: Math.round(52 * Theme.scale)
+                    width: parent.width
+                    height: Math.round((window.railOpen ? 42 : 54) * Theme.scale)
 
                     Rectangle { // active indicator
                         visible: stack.currentIndex === index
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        width: 3; height: 26; radius: 1.5
+                        width: 3; height: 24; radius: 1.5
                         color: Theme.accent
                     }
 
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 1
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        radius: Theme.radius
+                        color: navHover.hovered && stack.currentIndex !== index
+                               ? Theme.surfaceAlt : "transparent"
+                    }
+
+                    // Expanded: icon beside text. Collapsed: big icon + tiny label.
+                    Row {
+                        visible: window.railOpen
+                        anchors.left: parent.left
+                        anchors.leftMargin: 16
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 12
                         Text {
                             text: modelData.icon
-                            font.pixelSize: Theme.fs(17)
+                            font.pixelSize: Theme.fs(20)
+                            color: stack.currentIndex === index ? Theme.accent
+                                                                : Theme.textSecondary
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: modelData.label
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fs(13)
+                            font.weight: stack.currentIndex === index ? Font.DemiBold
+                                                                      : Font.Normal
+                            color: stack.currentIndex === index ? Theme.textPrimary
+                                                                : Theme.textSecondary
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+                    Column {
+                        visible: !window.railOpen
+                        anchors.centerIn: parent
+                        spacing: 2
+                        Text {
+                            text: modelData.icon
+                            font.pixelSize: Theme.fs(22)
                             color: stack.currentIndex === index ? Theme.accent
                                                                 : Theme.textSecondary
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -144,23 +219,14 @@ ApplicationWindow {
                         }
                     }
 
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: 4
-                        radius: Theme.radius
-                        z: -1
-                        color: navHover.hovered && stack.currentIndex !== index
-                               ? Theme.surfaceAlt : "transparent"
-                    }
                     HoverHandler { id: navHover }
                     TapHandler { onTapped: stack.currentIndex = index }
                 }
             }
         }
-
     }
 
-    // ---- CLI-missing banner -----------------------------------------------
+    // ---- CLI-missing banner ---------------------------------------------------
     Rectangle {
         id: banner
         visible: !App.cliAvailable
@@ -182,7 +248,7 @@ ApplicationWindow {
         }
     }
 
-    // ---- Main content -------------------------------------------------------
+    // ---- Main content -----------------------------------------------------------
     StackLayout {
         id: stack
         anchors.top: banner.bottom
@@ -190,14 +256,16 @@ ApplicationWindow {
         anchors.right: parent.right
         anchors.bottom: terminal.top
 
-        // Package sections are flush (Teams panels); tool sections get padding.
         Item {
             HomeView {
                 anchors.fill: parent
                 anchors.margins: 20
                 onNavigate: stackIndex => stack.currentIndex =
-                                (stackIndex === 99 ? 6 + window.extraViews.length
-                                                   : stackIndex)
+                                (stackIndex === 99 ? window.historyIndex : stackIndex)
+                onSearchRequested: query => {
+                    App.search(query)
+                    stack.currentIndex = 1
+                }
             }
         }
         ExplorerView {}
@@ -208,7 +276,7 @@ ApplicationWindow {
             SettingsView {
                 anchors.fill: parent
                 anchors.margins: 16
-                onOpenHistory: stack.currentIndex = 6 + window.extraViews.length
+                onOpenHistory: stack.currentIndex = window.historyIndex
             }
         }
 
@@ -230,7 +298,7 @@ ApplicationWindow {
         }
     }
 
-    // ---- Terminal panel -------------------------------------------------------
+    // ---- Terminal panel -----------------------------------------------------------
     TerminalView {
         id: terminal
         anchors.left: parent.left
@@ -238,7 +306,7 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
     }
 
-    // ---- Toasts -----------------------------------------------------------------
+    // ---- Toasts ----------------------------------------------------------------------
     Rectangle {
         id: toastBox
         property bool isError: false

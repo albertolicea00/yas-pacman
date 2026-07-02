@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     app.setOrganizationName(QStringLiteral("YAS"));
     app.setApplicationName(QStringLiteral("yas-pacman"));
+    app.setApplicationVersion(QStringLiteral("0.1.0"));
     app.setApplicationDisplayName(QStringLiteral("Yet Another Store for Pacman"));
 
     QQuickStyle::setStyle(QStringLiteral("Basic"));

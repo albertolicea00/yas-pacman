@@ -25,6 +25,8 @@ class ThemeManager : public QObject {
     Q_PROPERTY(QString featuredUrl READ featuredUrl
                    WRITE setFeaturedUrl NOTIFY featuredUrlChanged)
     Q_PROPERTY(double uiScale READ uiScale WRITE setUiScale NOTIFY uiScaleChanged)
+    Q_PROPERTY(bool railExpanded READ railExpanded WRITE setRailExpanded NOTIFY railExpandedChanged)
+    Q_PROPERTY(QString defaultKind READ defaultKind WRITE setDefaultKind NOTIFY defaultKindChanged)
 public:
     explicit ThemeManager(QObject *parent = nullptr);
 
@@ -66,6 +68,14 @@ public:
     double uiScale() const { return m_uiScale; }
     void setUiScale(double scale);
 
+    // Sidebar rail expanded (icon + text) vs compact (icon only).
+    bool railExpanded() const { return m_railExpanded; }
+    void setRailExpanded(bool expanded);
+
+    // Kind filter applied to Installed by default ("" = all).
+    QString defaultKind() const { return m_defaultKind; }
+    void setDefaultKind(const QString &kind);
+
 signals:
     void themeModeChanged();
     void darkModeChanged();
@@ -76,6 +86,8 @@ signals:
     void showFeaturedChanged();
     void featuredUrlChanged();
     void uiScaleChanged();
+    void railExpandedChanged();
+    void defaultKindChanged();
 
 private:
     bool systemPrefersDark() const;
@@ -89,6 +101,8 @@ private:
     bool m_showFeatured = true;
     QString m_featuredUrl;
     double m_uiScale = 1.0;
+    bool m_railExpanded = true;
+    QString m_defaultKind;
 };
 
 } // namespace yas
