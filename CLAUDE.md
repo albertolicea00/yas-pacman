@@ -22,6 +22,7 @@ Arch Linux and derivatives (Manjaro, EndeavourOS). x64.
 - Repo packages only — AUR is yas-yay's job. Keep scope separation.
 
 ## Design (see DESIGN.md)
+- UI shell: **Teams-style** — icon rail | list panel | detail pane (no in-app title header). Light/dark mode persisted via `YasManager` context property (`src/core/thememanager.*`, QSettings), toggle at rail bottom. Both palettes live in `qml/core/Theme.qml` (`Theme.dark`).
 - Dark theme. Base `#222629`, accent **Orange `#FF5722`**, highlight `#FF57221A`, text `#F8F8F2` / `#ACADAD`.
 - App tag: **PACMAN**. Fonts: Outfit/Inter (UI), Fira Code or JetBrains Mono (CLI output).
 
