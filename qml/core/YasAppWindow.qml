@@ -23,7 +23,6 @@ ApplicationWindow {
         { label: qsTr("Installed"), icon: "▤" },
         { label: qsTr("Updates"),   icon: "↺" },
         { label: qsTr("Actions"),   icon: "⚙" },
-        { label: qsTr("History"),   icon: "≡" },
         { label: qsTr("Settings"),  icon: "✦" },
     ]
 
@@ -196,21 +195,37 @@ ApplicationWindow {
             HomeView {
                 anchors.fill: parent
                 anchors.margins: 20
-                onNavigate: stackIndex => stack.currentIndex = stackIndex
+                onNavigate: stackIndex => stack.currentIndex =
+                                (stackIndex === 99 ? 6 + window.extraViews.length
+                                                   : stackIndex)
             }
         }
         ExplorerView {}
         InstalledView {}
         UpdatesView {}
         Item { ActionsView { anchors.fill: parent; anchors.margins: 16 } }
-        Item { HistoryView { anchors.fill: parent; anchors.margins: 16 } }
-        Item { SettingsView { anchors.fill: parent; anchors.margins: 16 } }
+        Item {
+            SettingsView {
+                anchors.fill: parent
+                anchors.margins: 16
+                onOpenHistory: stack.currentIndex = 6 + window.extraViews.length
+            }
+        }
 
         Repeater {
             model: window.extraViews
             delegate: Loader {
                 required property var modelData
                 source: modelData.source
+            }
+        }
+
+        // History: not in the rail — reached from Settings (and Home).
+        Item {
+            HistoryView {
+                anchors.fill: parent
+                anchors.margins: 16
+                onBack: stack.currentIndex = 5
             }
         }
     }

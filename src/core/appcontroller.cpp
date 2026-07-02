@@ -170,6 +170,9 @@ void AppController::refreshOutdated()
                          if (!ok)
                              return;
                          auto packages = m_adapter->parseOutdated(out);
+                         // Outdated listings are sparse (no homepage/desc);
+                         // enrich from the installed index for icons/badges.
+                         annotateInstalled(packages);
                          saveListCache(QStringLiteral("outdated"), packages);
                          m_outdatedModel.setPackages(std::move(packages));
                      }});
@@ -377,12 +380,21 @@ void AppController::annotateInstalled(QList<Package> &packages) const
 {
     for (Package &p : packages) {
         const auto it = m_installedIndex.constFind(p.id);
-        if (it != m_installedIndex.constEnd()) {
+        if (it == m_installedIndex.constEnd())
+            continue;
+        if (p.installedVersion.isEmpty())
             p.installedVersion = it->installedVersion;
-            p.pinned = it->pinned;
-            if (p.version.isEmpty())
-                p.version = it->version;
-        }
+        p.pinned = p.pinned || it->pinned;
+        if (p.version.isEmpty())
+            p.version = it->version;
+        if (p.description.isEmpty())
+            p.description = it->description;
+        if (p.homepage.isEmpty())
+            p.homepage = it->homepage;
+        if (p.source.isEmpty())
+            p.source = it->source;
+        if (p.kind.isEmpty())
+            p.kind = it->kind;
     }
 }
 

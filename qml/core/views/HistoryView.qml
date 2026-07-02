@@ -3,13 +3,22 @@ import QtQuick.Controls.Basic
 import Yas.Core
 
 // "Command Reminder Companion": persistent history of every command run.
+// Not in the rail — reached from Settings.
 Column {
+    id: historyRoot
+    signal back()
     spacing: Theme.spacing
 
     Row {
         width: parent.width
         spacing: Theme.spacing
 
+        IconButton {
+            icon: "‹"
+            label: qsTr("Back to settings")
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: historyRoot.back()
+        }
         IconButton {
             icon: "⌫"
             label: qsTr("Clear history")

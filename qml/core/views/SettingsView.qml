@@ -4,6 +4,7 @@ import Yas.Core
 
 Flickable {
     id: root
+    signal openHistory()
     contentHeight: content.height + 20
     clip: true
     ScrollBar.vertical: ScrollBar {}
@@ -229,8 +230,13 @@ Flickable {
             Row {
                 spacing: 4
                 IconButton {
+                    icon: "≡"
+                    label: qsTr("View command history (%1)").arg(App.commandLog.count)
+                    onClicked: root.openHistory()
+                }
+                IconButton {
                     icon: "⌫"
-                    label: qsTr("Clear command history (%1)").arg(App.commandLog.count)
+                    label: qsTr("Clear")
                     tint: Theme.danger
                     onClicked: App.commandLog.clear()
                 }

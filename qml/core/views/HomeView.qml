@@ -6,7 +6,7 @@ import Yas.Core
 // CLI health and recent activity — one card each, with quick actions.
 Flickable {
     id: root
-    signal navigate(int stackIndex) // 1 Explore · 2 Installed · 3 Updates · 4 Actions · 5 History · 6 Settings
+    signal navigate(int stackIndex) // 1 Explore · 2 Installed · 3 Updates · 4 Actions · 5 Settings · 99 History
 
     contentHeight: content.height
     clip: true
@@ -120,7 +120,7 @@ Flickable {
                 AccentButton {
                     subtle: true
                     text: qsTr("View history")
-                    onClicked: root.navigate(5)
+                    onClicked: root.navigate(99)
                 }
             ]
         }

@@ -56,26 +56,20 @@ Rectangle {
             width: parent.width
             spacing: 8
 
-            Rectangle { // favicon with initial fallback
-                width: Theme.fs(36); height: Theme.fs(36); radius: Theme.fs(18)
+            Item { // app icon, plain; puzzle piece when unavailable
+                width: Theme.fs(34); height: Theme.fs(34)
                 anchors.verticalCenter: parent.verticalCenter
-                color: Theme.accentSubtle
-                clip: true
                 Text {
                     anchors.centerIn: parent
                     visible: favicon.status !== Image.Ready
-                    text: root.hasPackage && root.pkg.name.length > 0
-                          ? root.pkg.name.charAt(0).toUpperCase() : "?"
-                    color: Theme.accent
-                    font.family: Theme.uiFont
-                    font.pixelSize: Theme.fs(16)
-                    font.weight: Font.Bold
+                    text: "🧩"
+                    font.pixelSize: Theme.fs(24)
                 }
                 Image {
                     id: favicon
                     anchors.fill: parent
-                    anchors.margins: 5
                     fillMode: Image.PreserveAspectFit
+                    asynchronous: true
                     visible: status === Image.Ready
                     source: {
                         if (!root.hasPackage || !root.pkg.homepage
@@ -90,7 +84,7 @@ Rectangle {
             }
 
             Text {
-                width: parent.width - opsRow.implicitWidth - Theme.fs(36) - 16
+                width: parent.width - opsRow.implicitWidth - Theme.fs(34) - 16
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.hasPackage ? root.pkg.name : ""
                 color: Theme.textPrimary
@@ -149,7 +143,16 @@ Rectangle {
             spacing: 6
             TagBadge { visible: root.hasPackage && root.pkg.kind.length > 0; text: root.hasPackage ? root.pkg.kind : "" }
             TagBadge { visible: root.hasPackage && root.pkg.pinned; text: qsTr("PINNED") }
-            TagBadge { visible: root.hasPackage && root.pkg.outdated; text: qsTr("UPDATE"); tint: Theme.danger }
+            TagBadge {
+                visible: root.hasPackage && root.pkg.outdated
+                text: qsTr("UPDATE AVAILABLE")
+                tint: Theme.danger
+            }
+            TagBadge {
+                visible: root.hasPackage && root.pkg.installed && !root.pkg.outdated
+                text: qsTr("UP TO DATE")
+                tint: Theme.success
+            }
         }
 
         Row {
@@ -175,23 +178,45 @@ Rectangle {
             wrapMode: Text.WordWrap
         }
 
-        Column {
-            spacing: 4
-            Text {
-                visible: root.hasPackage && root.pkg.version.length > 0
-                text: qsTr("Latest: %1").arg(root.hasPackage ? root.pkg.version : "")
-                color: Theme.textSecondary; font.family: Theme.monoFont; font.pixelSize: Theme.fs(12)
+        // Metadata grid: label column + value column.
+        Grid {
+            columns: 2
+            columnSpacing: 14
+            rowSpacing: 4
+
+            component MetaLabel: Text {
+                color: Theme.textSecondary
+                font.family: Theme.uiFont
+                font.pixelSize: Theme.fs(11)
             }
-            Text {
-                visible: root.hasPackage && root.pkg.installed
-                text: qsTr("Installed: %1").arg(root.hasPackage ? root.pkg.installedVersion : "")
-                color: Theme.textSecondary; font.family: Theme.monoFont; font.pixelSize: Theme.fs(12)
+            component MetaValue: Text {
+                color: Theme.textPrimary
+                font.family: Theme.monoFont
+                font.pixelSize: Theme.fs(12)
             }
-            Text {
-                visible: root.hasPackage && root.pkg.source.length > 0
-                text: qsTr("Source: %1").arg(root.hasPackage ? root.pkg.source : "")
-                color: Theme.textSecondary; font.family: Theme.monoFont; font.pixelSize: Theme.fs(12)
-            }
+
+            MetaLabel { text: qsTr("Identifier") }
+            MetaValue { text: root.hasPackage ? root.pkg.packageId : "" }
+
+            MetaLabel { visible: root.hasPackage && root.pkg.version.length > 0
+                        text: qsTr("Latest version") }
+            MetaValue { visible: root.hasPackage && root.pkg.version.length > 0
+                        text: root.hasPackage ? root.pkg.version : "" }
+
+            MetaLabel { visible: root.hasPackage && root.pkg.installed
+                        text: qsTr("Installed version") }
+            MetaValue { visible: root.hasPackage && root.pkg.installed
+                        text: root.hasPackage ? root.pkg.installedVersion : "" }
+
+            MetaLabel { visible: root.hasPackage && root.pkg.source.length > 0
+                        text: qsTr("Source") }
+            MetaValue { visible: root.hasPackage && root.pkg.source.length > 0
+                        text: root.hasPackage ? root.pkg.source : "" }
+
+            MetaLabel { visible: root.hasPackage && root.pkg.kind.length > 0
+                        text: qsTr("Type") }
+            MetaValue { visible: root.hasPackage && root.pkg.kind.length > 0
+                        text: root.hasPackage ? root.pkg.kind : "" }
         }
 
         Text {

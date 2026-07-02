@@ -35,24 +35,18 @@ ItemDelegate {
     contentItem: Row {
         spacing: 10
 
-        Rectangle { // favicon with initial fallback
-            width: Theme.fs(34); height: Theme.fs(34); radius: Theme.fs(17)
+        Item { // app icon, plain (no circle); puzzle piece when unavailable
+            width: Theme.fs(30); height: Theme.fs(30)
             anchors.verticalCenter: parent.verticalCenter
-            color: Theme.accentSubtle
-            clip: true
             Text {
                 anchors.centerIn: parent
                 visible: rowFavicon.status !== Image.Ready
-                text: control.name.length > 0 ? control.name.charAt(0).toUpperCase() : "?"
-                color: Theme.accent
-                font.family: Theme.uiFont
-                font.pixelSize: Theme.fs(15)
-                font.weight: Font.Bold
+                text: "🧩"
+                font.pixelSize: Theme.fs(20)
             }
             Image {
                 id: rowFavicon
                 anchors.fill: parent
-                anchors.margins: 5
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
                 visible: status === Image.Ready
@@ -68,7 +62,7 @@ ItemDelegate {
         }
 
         Column {
-            width: parent.width - Theme.fs(34) - statusColumn.width - 20
+            width: parent.width - Theme.fs(30) - statusColumn.width - 20
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
 
