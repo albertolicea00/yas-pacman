@@ -5,8 +5,8 @@ import QtQuick
 // `accent` and `tag` are set at startup by the store app via YasAppWindow.
 QtObject {
     // Suite background palette — neutral OS-style dark grays.
-    property color base: "#212826"
-    property color surface: "#2A302E"
+    property color base: "#222629"
+    property color surface: "#2D3032"
     property color surfaceAlt: "#2D3130"
     property color border: "#393C3B"
     property color terminalBase: "#1A201E"

@@ -9,8 +9,8 @@ The design is built around a modern, premium Dark Theme featuring a deep store b
 ### Color Tokens
 
 - **Store Base Color (Dark Gray)**:
-  - Hex: `#212826`
-  - HSL: `hsl(163, 10%, 14%)`
+  - Hex: `#222629`
+  - HSL: `hsl(206, 9%, 15%)`
 - **Accent Color (Orange)**:
   - Hex: `#FF5722`
   - HSL: `hsl(14, 100%, 57%)`
