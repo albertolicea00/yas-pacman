@@ -13,7 +13,9 @@ Dialog {
 
     anchors.centerIn: Overlay.overlay
     modal: true
-    padding: 16
+    padding: 20
+    // Size to the widest part (content vs buttons) so nothing overflows.
+    width: Math.max(360, implicitWidth)
 
     background: Rectangle {
         color: Theme.surface
@@ -26,11 +28,14 @@ Dialog {
     }
 
     header: Item {
-        implicitHeight: control.title.length > 0 ? Theme.fs(44) : 0
+        implicitHeight: control.title.length > 0 ? Theme.fs(46) : 0
+        implicitWidth: headerText.implicitWidth + 40
         Text {
+            id: headerText
             anchors.left: parent.left
-            anchors.leftMargin: 16
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 20
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 4
             text: control.title
             color: Theme.textPrimary
             font.family: Theme.headingFont
@@ -40,10 +45,12 @@ Dialog {
     }
 
     footer: Item {
-        implicitHeight: Theme.fs(52)
+        implicitHeight: Theme.fs(58)
+        implicitWidth: footerRow.implicitWidth + 40
         Row {
+            id: footerRow
             anchors.right: parent.right
-            anchors.rightMargin: 16
+            anchors.rightMargin: 20
             anchors.verticalCenter: parent.verticalCenter
             spacing: 8
 
