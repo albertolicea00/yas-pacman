@@ -2,9 +2,11 @@ import QtQuick
 import QtQuick.Controls.Basic
 import Yas.Core
 
-// Teams-style list + detail: flush full-height list panel (section title,
-// search, optional action row, rows) separated from the detail pane by a
-// 1px divider — no floating cards.
+// Teams-style list + detail. The list takes the full width until a package
+// is selected; then the detail pane opens on the right (~5/12) and can be
+// closed again from its ✕ button. Optional integrated refresh icon next to
+// the search bar and a custom empty-state component (used by the Explore
+// storefront).
 Item {
     id: root
     property alias model: list.model
@@ -12,9 +14,13 @@ Item {
     property string title: ""
     property string placeholder: ""      // empty -> no search field
     property bool liveFilter: false      // true -> text drives model.filter
+    property bool showRefresh: false
+    signal refresh()
     signal search(string query)
     property alias headerExtra: extraRow.data
+    property Component emptyContent: null
     property int selectedRow: -1
+    readonly property bool detailOpen: selectedRow >= 0
 
     function clearSelection() {
         selectedRow = -1
@@ -23,10 +29,11 @@ Item {
 
     Rectangle {
         id: listPanel
-        width: Theme.listPanelWidth
+        width: root.detailOpen ? Math.round(root.width * 7 / 12) : root.width
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         color: Theme.surface
+        Behavior on width { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
         Column {
             anchors.fill: parent
@@ -34,24 +41,53 @@ Item {
             anchors.bottomMargin: 0
             spacing: 10
 
-            Text {
-                visible: root.title.length > 0
-                text: root.title
-                color: Theme.textPrimary
-                font.family: Theme.headingFont
-                font.pixelSize: 18
-                font.weight: Font.Bold
+            Row {
+                width: parent.width
+                spacing: 6
+
+                Text {
+                    visible: root.title.length > 0
+                    width: parent.width - (refreshTitleBtn.visible && !searchField.visible
+                                           ? refreshTitleBtn.width + 6 : 0)
+                    text: root.title
+                    color: Theme.textPrimary
+                    font.family: Theme.headingFont
+                    font.pixelSize: 18
+                    font.weight: Font.Bold
+                }
+                IconButton {
+                    id: refreshTitleBtn
+                    visible: root.showRefresh && !searchField.visible
+                    icon: "↻"
+                    tooltip: qsTr("Refresh")
+                    anchors.verticalCenter: parent.verticalCenter
+                    onClicked: root.refresh()
+                }
             }
 
-            SearchBar {
-                id: searchField
-                visible: root.placeholder.length > 0
+            Row {
                 width: parent.width
-                bg: Theme.base
-                placeholder: root.placeholder
-                onAccepted: query => root.search(query)
-                onTextChanged: if (root.liveFilter && root.model)
-                                   root.model.filter = text
+                spacing: 6
+                visible: searchField.visible
+
+                SearchBar {
+                    id: searchField
+                    visible: root.placeholder.length > 0
+                    width: parent.width - (refreshBtn.visible ? refreshBtn.width + 6 : 0)
+                    bg: Theme.base
+                    placeholder: root.placeholder
+                    onAccepted: query => root.search(query)
+                    onTextChanged: if (root.liveFilter && root.model)
+                                       root.model.filter = text
+                }
+                IconButton {
+                    id: refreshBtn
+                    visible: root.showRefresh && searchField.visible
+                    icon: "↻"
+                    tooltip: qsTr("Refresh")
+                    anchors.verticalCenter: parent.verticalCenter
+                    onClicked: root.refresh()
+                }
             }
 
             Row {
@@ -61,10 +97,51 @@ Item {
                 visible: children.length > 0
             }
 
+            // Kind filter chips (formula/cask, app/runtime, repo/aur...).
+            Flow {
+                width: parent.width
+                spacing: 6
+                visible: root.model && root.model.kindSummary !== undefined
+                         && root.model.kindSummary.length > 1
+
+                Repeater {
+                    model: (root.model && root.model.kindSummary !== undefined
+                            && root.model.kindSummary.length > 1)
+                           ? [{kind: "", count: root.model.totalCount}].concat(
+                                 root.model.kindSummary)
+                           : []
+                    delegate: Rectangle {
+                        required property var modelData
+                        readonly property bool active:
+                            root.model.kindFilter === modelData.kind
+                        width: chipLabel.implicitWidth + 18
+                        height: 24
+                        radius: 12
+                        color: active ? Theme.accentSubtle : Theme.base
+                        border.color: active ? Theme.accent : Theme.border
+
+                        Text {
+                            id: chipLabel
+                            anchors.centerIn: parent
+                            text: (modelData.kind.length > 0 ? modelData.kind
+                                                             : qsTr("all"))
+                                  + " " + modelData.count
+                            color: parent.active ? Theme.accent : Theme.textSecondary
+                            font.family: Theme.uiFont
+                            font.pixelSize: 11
+                        }
+                        TapHandler {
+                            onTapped: root.model.kindFilter = modelData.kind
+                        }
+                    }
+                }
+            }
+
             ListView {
                 id: list
                 width: parent.width
                 height: parent.height - y
+                visible: list.count > 0
                 clip: true
                 spacing: 1
                 delegate: PackageDelegate {
@@ -76,6 +153,13 @@ Item {
                 }
                 ScrollBar.vertical: ScrollBar {}
             }
+
+            Loader {
+                width: parent.width
+                height: parent.height - y
+                active: list.count === 0 && root.emptyContent !== null
+                sourceComponent: root.emptyContent
+            }
         }
 
         Text {
@@ -84,7 +168,7 @@ Item {
             width: parent.width - 40
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
-            visible: list.count === 0
+            visible: list.count === 0 && root.emptyContent === null
             color: Theme.textSecondary
             font.family: Theme.uiFont
             font.pixelSize: 13
@@ -92,6 +176,7 @@ Item {
     }
 
     Rectangle { // divider between list and detail
+        visible: root.detailOpen
         anchors.left: listPanel.right
         width: 1
         height: parent.height
@@ -100,11 +185,13 @@ Item {
 
     DetailPane {
         id: detail
+        visible: root.detailOpen
         anchors.left: listPanel.right
         anchors.leftMargin: 1
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
+        onCloseRequested: root.clearSelection()
     }
 
     Connections {

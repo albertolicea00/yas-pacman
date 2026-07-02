@@ -5,18 +5,13 @@ PackageBrowser {
     title: qsTr("Updates")
     model: App.outdatedModel
     emptyText: qsTr("Everything is up to date")
+    showRefresh: true
+    onRefresh: App.refreshOutdated()
     headerExtra: [
         AccentButton {
-            enabled: App.outdatedModel.count > 0
-            text: App.outdatedModel.count > 0
-                  ? qsTr("Upgrade all (%1)").arg(App.outdatedModel.count)
-                  : qsTr("Upgrade all")
+            visible: App.outdatedModel.count > 0
+            text: qsTr("Upgrade all (%1)").arg(App.outdatedModel.count)
             onClicked: App.upgradeAll()
-        },
-        AccentButton {
-            subtle: true
-            text: qsTr("Check again")
-            onClicked: App.refreshOutdated()
         }
     ]
 }

@@ -1,0 +1,50 @@
+{
+  "categories": [
+    {
+      "name": "Essentials",
+      "packages": [
+        {
+          "id": "firefox",
+          "name": "firefox",
+          "description": "Web browser",
+          "kind": "repo"
+        },
+        {
+          "id": "git",
+          "name": "git",
+          "description": "Version control",
+          "kind": "repo"
+        },
+        {
+          "id": "htop",
+          "name": "htop",
+          "description": "Process viewer",
+          "kind": "repo"
+        }
+      ]
+    },
+    {
+      "name": "Dev",
+      "packages": [
+        {
+          "id": "base-devel",
+          "name": "base-devel",
+          "description": "Development toolchain",
+          "kind": "repo"
+        },
+        {
+          "id": "python",
+          "name": "python",
+          "description": "Programming language",
+          "kind": "repo"
+        },
+        {
+          "id": "jq",
+          "name": "jq",
+          "description": "JSON processor",
+          "kind": "repo"
+        }
+      ]
+    }
+  ]
+}

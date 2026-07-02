@@ -18,6 +18,7 @@ ApplicationWindow {
     property var extraViews: []
 
     readonly property var baseNav: [
+        { label: qsTr("Home"),      icon: "⌂" },
         { label: qsTr("Explore"),   icon: "⌕" },
         { label: qsTr("Installed"), icon: "▤" },
         { label: qsTr("Updates"),   icon: "↺" },
@@ -121,7 +122,7 @@ ApplicationWindow {
                     }
 
                     Rectangle { // updates badge
-                        visible: index === 2 && App.outdatedModel.count > 0
+                        visible: index === 3 && App.outdatedModel.count > 0
                         anchors.top: parent.top
                         anchors.topMargin: 4
                         anchors.right: parent.right
@@ -216,6 +217,13 @@ ApplicationWindow {
         anchors.bottom: terminal.top
 
         // Package sections are flush (Teams panels); tool sections get padding.
+        Item {
+            HomeView {
+                anchors.fill: parent
+                anchors.margins: 20
+                onNavigate: stackIndex => stack.currentIndex = stackIndex
+            }
+        }
         ExplorerView {}
         InstalledView {}
         UpdatesView {}

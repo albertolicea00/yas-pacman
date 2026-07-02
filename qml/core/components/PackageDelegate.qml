@@ -64,6 +64,7 @@ ItemDelegate {
             }
             Text {
                 width: parent.width
+                visible: YasManager.showDescriptions
                 text: control.description.length > 0 ? control.description : control.packageId
                 color: Theme.textSecondary
                 font.family: Theme.uiFont

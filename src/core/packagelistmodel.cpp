@@ -71,6 +71,18 @@ void PackageListModel::setFilter(const QString &filter)
     emit countChanged();
 }
 
+void PackageListModel::setKindFilter(const QString &kind)
+{
+    if (m_kindFilter == kind)
+        return;
+    m_kindFilter = kind;
+    beginResetModel();
+    rebuild();
+    endResetModel();
+    emit filterChanged();
+    emit countChanged();
+}
+
 QVariantMap PackageListModel::get(int row) const
 {
     if (row < 0 || row >= m_visible.size())
@@ -95,12 +107,39 @@ QVariantMap PackageListModel::toMap(const Package &p)
     };
 }
 
+int PackageListModel::pinnedCount() const
+{
+    int count = 0;
+    for (const Package &p : m_all) {
+        if (p.pinned)
+            ++count;
+    }
+    return count;
+}
+
+QVariantList PackageListModel::kindSummary() const
+{
+    QMap<QString, int> counts; // QMap keeps a stable (sorted) order
+    for (const Package &p : m_all)
+        counts[p.kind]++;
+    QVariantList list;
+    for (auto it = counts.constBegin(); it != counts.constEnd(); ++it) {
+        list.append(QVariantMap{
+            {QStringLiteral("kind"), it.key()},
+            {QStringLiteral("count"), it.value()},
+        });
+    }
+    return list;
+}
+
 void PackageListModel::rebuild()
 {
     m_visible.clear();
     m_visible.reserve(m_all.size());
     const QString needle = m_filter.trimmed();
     for (int i = 0; i < m_all.size(); ++i) {
+        if (!m_kindFilter.isEmpty() && m_all.at(i).kind != m_kindFilter)
+            continue;
         if (needle.isEmpty()
             || m_all.at(i).name.contains(needle, Qt::CaseInsensitive)
             || m_all.at(i).description.contains(needle, Qt::CaseInsensitive)) {

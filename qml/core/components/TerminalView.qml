@@ -26,7 +26,11 @@ Rectangle {
     Connections {
         target: App
         function onTerminalOutput(line, isStdErr) { root.append(line, isStdErr) }
-        function onCommandStarted(commandLine) { root.append("$ " + commandLine, false) }
+        function onCommandStarted(commandLine) {
+            root.append("$ " + commandLine, false)
+            if (YasManager.terminalAutoExpand)
+                root.expanded = true
+        }
         function onCommandFinished(exitCode) {
             if (exitCode !== 0)
                 root.append(qsTr("[exit code %1]").arg(exitCode), true)
@@ -83,15 +87,18 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 6
 
-            AccentButton {
+            IconButton {
                 visible: App.queue.busy
-                subtle: true; danger: true
-                text: qsTr("Cancel")
+                icon: "⊘"
+                label: qsTr("Cancel")
+                tint: Theme.danger
+                anchors.verticalCenter: parent.verticalCenter
                 onClicked: App.queue.cancelCurrent()
             }
-            AccentButton {
-                subtle: true
-                text: qsTr("Clear")
+            IconButton {
+                icon: "⌫"
+                label: qsTr("Clear")
+                anchors.verticalCenter: parent.verticalCenter
                 onClicked: lines.clear()
             }
         }

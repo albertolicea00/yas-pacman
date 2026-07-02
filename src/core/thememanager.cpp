@@ -1,5 +1,6 @@
 #include "thememanager.h"
 
+#include <QFile>
 #include <QGuiApplication>
 #include <QStyleHints>
 
@@ -12,6 +13,17 @@ ThemeManager::ThemeManager(QObject *parent)
 {
     if (m_mode != QStringLiteral("light") && m_mode != QStringLiteral("dark"))
         m_mode = QStringLiteral("auto");
+    m_terminalAutoExpand =
+        m_settings.value(QStringLiteral("ui/terminalAutoExpand"), false).toBool();
+    m_autoLoadDetails =
+        m_settings.value(QStringLiteral("ui/autoLoadDetails"), true).toBool();
+    m_confirmDestructive =
+        m_settings.value(QStringLiteral("ui/confirmDestructive"), true).toBool();
+    m_showDescriptions =
+        m_settings.value(QStringLiteral("ui/showDescriptions"), true).toBool();
+    m_showFeatured =
+        m_settings.value(QStringLiteral("ui/showFeatured"), true).toBool();
+    m_featuredUrl = m_settings.value(QStringLiteral("ui/featuredUrl")).toString();
 
     // Follow the OS live while in auto mode (user flips system appearance).
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this,
@@ -44,6 +56,68 @@ void ThemeManager::setThemeMode(const QString &mode)
     m_settings.setValue(QStringLiteral("ui/themeMode"), mode);
     emit themeModeChanged();
     emit darkModeChanged();
+}
+
+void ThemeManager::setTerminalAutoExpand(bool expand)
+{
+    if (m_terminalAutoExpand == expand)
+        return;
+    m_terminalAutoExpand = expand;
+    m_settings.setValue(QStringLiteral("ui/terminalAutoExpand"), expand);
+    emit terminalAutoExpandChanged();
+}
+
+void ThemeManager::setAutoLoadDetails(bool autoLoad)
+{
+    if (m_autoLoadDetails == autoLoad)
+        return;
+    m_autoLoadDetails = autoLoad;
+    m_settings.setValue(QStringLiteral("ui/autoLoadDetails"), autoLoad);
+    emit autoLoadDetailsChanged();
+}
+
+void ThemeManager::setConfirmDestructive(bool confirm)
+{
+    if (m_confirmDestructive == confirm)
+        return;
+    m_confirmDestructive = confirm;
+    m_settings.setValue(QStringLiteral("ui/confirmDestructive"), confirm);
+    emit confirmDestructiveChanged();
+}
+
+QString ThemeManager::bundledFeaturedJson() const
+{
+    QFile file(QStringLiteral(":/yas/featured.json"));
+    if (!file.open(QIODevice::ReadOnly))
+        return QStringLiteral("{}");
+    return QString::fromUtf8(file.readAll());
+}
+
+void ThemeManager::setShowDescriptions(bool show)
+{
+    if (m_showDescriptions == show)
+        return;
+    m_showDescriptions = show;
+    m_settings.setValue(QStringLiteral("ui/showDescriptions"), show);
+    emit showDescriptionsChanged();
+}
+
+void ThemeManager::setShowFeatured(bool show)
+{
+    if (m_showFeatured == show)
+        return;
+    m_showFeatured = show;
+    m_settings.setValue(QStringLiteral("ui/showFeatured"), show);
+    emit showFeaturedChanged();
+}
+
+void ThemeManager::setFeaturedUrl(const QString &url)
+{
+    if (m_featuredUrl == url)
+        return;
+    m_featuredUrl = url;
+    m_settings.setValue(QStringLiteral("ui/featuredUrl"), url);
+    emit featuredUrlChanged();
 }
 
 void ThemeManager::cycleThemeMode()

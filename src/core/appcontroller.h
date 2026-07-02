@@ -60,6 +60,10 @@ public:
 
     Q_INVOKABLE void runAction(const QString &actionId, const QString &packageId);
     Q_INVOKABLE QString actionCommandPreview(const QString &actionId) const;
+    Q_INVOKABLE bool hasAction(const QString &actionId) const;
+    // Runs an action silently and delivers its stdout via actionOutputReady —
+    // for views that render command output (dependencies, taps, ...).
+    Q_INVOKABLE void fetchActionOutput(const QString &actionId, const QString &packageId);
 
 signals:
     void cliChanged();
@@ -68,6 +72,8 @@ signals:
     void commandFinished(int exitCode);
     void infoReady(const QVariantMap &package);
     void toast(const QString &message, bool isError);
+    void actionOutputReady(const QString &actionId, const QString &packageId,
+                           const QString &stdOut, bool ok);
 
 private:
     void enqueueMutation(const QString &kind, const QString &packageId,

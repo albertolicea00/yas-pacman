@@ -18,9 +18,11 @@ Column {
             font.pixelSize: 16
             font.weight: Font.DemiBold
         }
-        AccentButton {
-            subtle: true; danger: true
-            text: qsTr("Clear history")
+        IconButton {
+            icon: "⌫"
+            label: qsTr("Clear history")
+            tint: Theme.danger
+            anchors.verticalCenter: parent.verticalCenter
             onClicked: App.commandLog.clear()
         }
     }
@@ -68,13 +70,13 @@ Column {
                 }
             }
 
-            AccentButton {
+            IconButton {
                 id: copyBtn
                 anchors.right: parent.right
                 anchors.rightMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
-                subtle: true
-                text: qsTr("Copy")
+                icon: "⧉"
+                tooltip: qsTr("Copy command")
                 onClicked: {
                     copyHelper.text = model.commandLine
                     copyHelper.selectAll()

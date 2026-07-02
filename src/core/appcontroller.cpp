@@ -182,6 +182,26 @@ QString AppController::actionCommandPreview(const QString &actionId) const
     return m_adapter->actionById(actionId).command.displayString();
 }
 
+bool AppController::hasAction(const QString &actionId) const
+{
+    return m_adapter->actionById(actionId).command.isValid();
+}
+
+void AppController::fetchActionOutput(const QString &actionId, const QString &packageId)
+{
+    const CliAction action = m_adapter->actionById(actionId);
+    if (!action.command.isValid())
+        return;
+    CliCommand command = action.command;
+    if (action.needsPackage && !packageId.isEmpty())
+        command.arguments.append(packageId);
+    m_queue.enqueue({QStringLiteral("fetch:") + actionId, packageId, command,
+                     [this, actionId, packageId](bool ok, const QString &out, const QString &err) {
+                         emit actionOutputReady(actionId, packageId,
+                                                ok ? out : err, ok);
+                     }});
+}
+
 void AppController::enqueueMutation(const QString &kind, const QString &packageId,
                                     const CliCommand &command,
                                     const QString &successMessage)

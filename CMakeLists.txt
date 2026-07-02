@@ -40,6 +40,11 @@ qt_add_qml_module(yascoreui
         qml/core/components/PackageBrowser.qml
         qml/core/components/DetailPane.qml
         qml/core/components/TerminalView.qml
+        qml/core/components/SummaryCard.qml
+        qml/core/components/IconButton.qml
+        qml/core/components/ThemedSwitch.qml
+        qml/core/components/FeaturedView.qml
+        qml/core/views/HomeView.qml
         qml/core/views/ExplorerView.qml
         qml/core/views/InstalledView.qml
         qml/core/views/UpdatesView.qml
@@ -68,6 +73,14 @@ if(YAS_FONTS)
         PREFIX "/yas/fonts"
         BASE ${CMAKE_CURRENT_SOURCE_DIR}/assets/fonts
         FILES ${YAS_FONTS})
+endif()
+
+# Featured storefront mock (later replaced by the yas-web API)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/assets/featured.json)
+    qt_add_resources(yas-pacman "yas_featured"
+        PREFIX "/yas"
+        BASE ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        FILES ${CMAKE_CURRENT_SOURCE_DIR}/assets/featured.json)
 endif()
 
 # ---- Platform packaging hints ---------------------------------------------------
