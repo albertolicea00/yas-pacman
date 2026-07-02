@@ -3,8 +3,9 @@ import QtQuick.Controls.Basic
 import QtQuick.Layouts
 import Yas.Core
 
-// Application shell shared by every YAS store. Each app instantiates this
-// with its brand accent, tag and name; requires the `App` context property.
+// Teams-style application shell shared by every YAS store: a slim icon rail,
+// then each section lays out its own list + detail panels. Requires the
+// `App` and `YasManager` context properties.
 ApplicationWindow {
     id: window
 
@@ -12,7 +13,7 @@ ApplicationWindow {
     property color accent: Theme.accent
     property string tag: "YAS"
     property url iconSource: ""
-    // Per-app manager-specific views appended after the 6 base views.
+    // Per-app manager-specific views appended to the rail.
     // Each entry: { label: string, icon: string, source: url of a .qml }
     property var extraViews: []
 
@@ -40,101 +41,154 @@ ApplicationWindow {
             App.initialize()
     }
 
-    // ---- Sidebar ------------------------------------------------------
+    // Persisted light/dark mode (YasManager wraps QSettings).
+    Binding {
+        target: Theme
+        property: "dark"
+        value: YasManager.darkMode
+    }
+
+    // ---- Icon rail (Teams-style) -----------------------------------------
     Rectangle {
-        id: sidebar
-        width: Theme.sidebarWidth
+        id: rail
+        width: Theme.railWidth
         anchors.top: parent.top
         anchors.bottom: terminal.top
         color: Theme.surface
 
-        Column {
-            anchors.fill: parent
-            anchors.margins: 12
-            spacing: 6
+        Rectangle { // separator against content
+            anchors.right: parent.right
+            width: 1
+            height: parent.height
+            color: Theme.border
+        }
 
-            Row {
-                spacing: 8
-                padding: 6
-                Image {
-                    visible: window.iconSource.toString().length > 0
-                    source: window.iconSource
-                    width: 28; height: 28
-                    fillMode: Image.PreserveAspectFit
-                }
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    Text {
-                        text: "YAS"
-                        color: Theme.textPrimary
-                        font.family: Theme.headingFont
-                        font.pixelSize: 16
-                        font.weight: Font.Bold
-                    }
-                    TagBadge { text: window.tag }
-                }
+        Column {
+            anchors.top: parent.top
+            anchors.topMargin: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 4
+
+            Image {
+                visible: window.iconSource.toString().length > 0
+                source: window.iconSource
+                width: 30; height: 30
+                fillMode: Image.PreserveAspectFit
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+            TagBadge {
+                visible: window.iconSource.toString().length === 0
+                text: window.tag.substring(0, 4)
+                anchors.horizontalCenter: parent.horizontalCenter
             }
 
-            Item { width: 1; height: 12 }
+            Item { width: 1; height: 10 }
 
             Repeater {
                 model: window.baseNav.concat(window.extraViews)
-                delegate: Rectangle {
+                delegate: Item {
                     required property var modelData
                     required property int index
-                    width: parent.width
-                    height: 38
-                    radius: Theme.radius
-                    color: stack.currentIndex === index ? Theme.accentSubtle
-                           : navHover.hovered ? Theme.surfaceAlt : "transparent"
+                    width: Theme.railWidth
+                    height: 52
 
-                    Row {
+                    Rectangle { // active indicator
+                        visible: stack.currentIndex === index
                         anchors.left: parent.left
-                        anchors.leftMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 10
+                        width: 3; height: 26; radius: 1.5
+                        color: Theme.accent
+                    }
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 1
                         Text {
                             text: modelData.icon
-                            color: stack.currentIndex === index ? Theme.accent : Theme.textSecondary
-                            font.pixelSize: 14
+                            font.pixelSize: 17
+                            color: stack.currentIndex === index ? Theme.accent
+                                                                : Theme.textSecondary
+                            anchors.horizontalCenter: parent.horizontalCenter
                         }
                         Text {
                             text: modelData.label
-                            color: stack.currentIndex === index ? Theme.textPrimary : Theme.textSecondary
                             font.family: Theme.uiFont
-                            font.pixelSize: 13
-                            font.weight: stack.currentIndex === index ? Font.DemiBold : Font.Normal
+                            font.pixelSize: 9
+                            color: stack.currentIndex === index ? Theme.textPrimary
+                                                                : Theme.textSecondary
+                            anchors.horizontalCenter: parent.horizontalCenter
                         }
-                        Rectangle {
-                            visible: index === 2 && App.outdatedModel.count > 0
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: badge.implicitWidth + 10; height: 16; radius: 8
-                            color: Theme.danger
-                            Text {
-                                id: badge
-                                anchors.centerIn: parent
-                                text: App.outdatedModel.count
-                                color: "#141420"
-                                font.pixelSize: 10
-                                font.weight: Font.Bold
-                            }
+                    }
+
+                    Rectangle { // updates badge
+                        visible: index === 2 && App.outdatedModel.count > 0
+                        anchors.top: parent.top
+                        anchors.topMargin: 4
+                        anchors.right: parent.right
+                        anchors.rightMargin: 8
+                        width: Math.max(16, updatesBadge.implicitWidth + 8)
+                        height: 16; radius: 8
+                        color: Theme.danger
+                        Text {
+                            id: updatesBadge
+                            anchors.centerIn: parent
+                            text: App.outdatedModel.count
+                            color: "#FFFFFF"
+                            font.pixelSize: 9
+                            font.weight: Font.Bold
                         }
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        radius: Theme.radius
+                        z: -1
+                        color: navHover.hovered && stack.currentIndex !== index
+                               ? Theme.surfaceAlt : "transparent"
                     }
                     HoverHandler { id: navHover }
                     TapHandler { onTapped: stack.currentIndex = index }
                 }
             }
         }
+
+        // Light/dark toggle pinned to the bottom of the rail.
+        Item {
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: Theme.railWidth
+            height: 40
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: 4
+                radius: Theme.radius
+                color: themeHover.hovered ? Theme.surfaceAlt : "transparent"
+            }
+            Text {
+                anchors.centerIn: parent
+                text: Theme.dark ? "☀" : "☾"
+                font.pixelSize: 16
+                color: Theme.textSecondary
+            }
+            HoverHandler { id: themeHover }
+            TapHandler { onTapped: YasManager.toggleDarkMode() }
+            ToolTip.visible: themeHover.hovered
+            ToolTip.text: Theme.dark ? qsTr("Light mode") : qsTr("Dark mode")
+            ToolTip.delay: 400
+        }
     }
 
-    // ---- CLI-missing banner -------------------------------------------
+    // ---- CLI-missing banner -----------------------------------------------
     Rectangle {
         id: banner
         visible: !App.cliAvailable
         anchors.top: parent.top
-        anchors.left: sidebar.right
+        anchors.left: rail.right
         anchors.right: parent.right
-        height: visible ? 44 : 0
+        height: visible ? 40 : 0
         color: Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.15)
 
         Text {
@@ -149,14 +203,14 @@ ApplicationWindow {
         }
     }
 
-    // ---- Main content --------------------------------------------------
+    // ---- Main content -------------------------------------------------------
     StackLayout {
         id: stack
         anchors.top: banner.bottom
-        anchors.left: sidebar.right
+        anchors.left: rail.right
         anchors.right: parent.right
         anchors.bottom: terminal.top
-        anchors.margins: 16
+        anchors.margins: Theme.spacing
 
         ExplorerView {}
         InstalledView {}
@@ -174,7 +228,7 @@ ApplicationWindow {
         }
     }
 
-    // ---- Terminal panel --------------------------------------------------
+    // ---- Terminal panel -------------------------------------------------------
     TerminalView {
         id: terminal
         anchors.left: parent.left
@@ -182,7 +236,7 @@ ApplicationWindow {
         anchors.bottom: parent.bottom
     }
 
-    // ---- Toasts ---------------------------------------------------------
+    // ---- Toasts -----------------------------------------------------------------
     Rectangle {
         id: toastBox
         property bool isError: false
@@ -200,7 +254,7 @@ ApplicationWindow {
         Text {
             id: toastLabel
             anchors.centerIn: parent
-            color: "#141420"
+            color: "#FFFFFF"
             font.family: Theme.uiFont
             font.pixelSize: 13
             font.weight: Font.DemiBold

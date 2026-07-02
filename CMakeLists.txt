@@ -19,6 +19,7 @@ qt_add_library(yascore STATIC
     src/core/packagelistmodel.h src/core/packagelistmodel.cpp
     src/core/appcontroller.h src/core/appcontroller.cpp
     src/core/bootstrap.h src/core/bootstrap.cpp
+    src/core/thememanager.h src/core/thememanager.cpp
 )
 target_include_directories(yascore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/core)
 target_link_libraries(yascore PUBLIC
