@@ -19,7 +19,10 @@ Item {
     property alias headerExtra: extraRow.data
     property Component emptyContent: null
     property int selectedRow: -1
-    readonly property bool detailOpen: selectedRow >= 0
+    // Wide windows keep the detail pane docked (placeholder when nothing is
+    // selected); narrow ones only open it on selection.
+    readonly property bool wideMode: width >= 980
+    readonly property bool detailOpen: wideMode || selectedRow >= 0
 
     function clearSelection() {
         selectedRow = -1

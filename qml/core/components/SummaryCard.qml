@@ -12,7 +12,7 @@ Rectangle {
     width: parent ? parent.width : implicitWidth
     implicitHeight: Math.max(72, textColumn.implicitHeight + 28)
     radius: Theme.radius
-    color: Theme.surface
+    color: Theme.base
 
     Row {
         anchors.left: parent.left

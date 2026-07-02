@@ -95,7 +95,9 @@ ApplicationWindow {
                     }
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
-                        text: qsTr("YAS for %1").arg(window.tag)
+                        textFormat: Text.StyledText
+                        text: qsTr("YAS for") + " <font color=\"" + Theme.accent
+                              + "\">" + window.tag + "</font>"
                         color: Theme.textPrimary
                         font.family: Theme.headingFont
                         font.pixelSize: Theme.fs(14)
@@ -256,7 +258,8 @@ ApplicationWindow {
         anchors.right: parent.right
         anchors.bottom: terminal.top
 
-        Item {
+        Rectangle {
+            color: Theme.surface
             HomeView {
                 anchors.fill: parent
                 anchors.margins: 20

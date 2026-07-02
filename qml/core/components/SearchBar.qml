@@ -29,7 +29,7 @@ Rectangle {
 
         TextField {
             id: field
-            width: parent.width - 40
+            width: parent.width - 40 - (clearBtn.visible ? 22 : 0)
             anchors.verticalCenter: parent.verticalCenter
             color: Theme.textPrimary
             placeholderTextColor: Theme.textSecondary
@@ -37,6 +37,22 @@ Rectangle {
             font.pixelSize: Theme.fs(13)
             background: null
             onAccepted: root.accepted(text)
+        }
+
+        Text {
+            id: clearBtn
+            visible: field.text.length > 0
+            anchors.verticalCenter: parent.verticalCenter
+            text: "✕"
+            color: clearHover.hovered ? Theme.textPrimary : Theme.textSecondary
+            font.pixelSize: Theme.fs(13)
+            HoverHandler { id: clearHover; cursorShape: Qt.PointingHandCursor }
+            TapHandler {
+                onTapped: {
+                    field.text = ""
+                    root.accepted("")
+                }
+            }
         }
     }
 }

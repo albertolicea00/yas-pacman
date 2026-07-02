@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls.Basic
+import QtQuick.Layouts
 import Yas.Core
 
 // Home: search (jumps to Explore), stat tiles per package type, then the
@@ -26,28 +27,38 @@ Flickable {
         }
     }
 
+    // Informative stat tile (not clickable): icon + big number + label.
     component StatTile: Rectangle {
         property string value: ""
         property string label: ""
+        property string icon: ""
         property color tint: Theme.accent
-        property int targetIndex: -1
 
-        width: Theme.fs(128)
-        height: Theme.fs(84)
+        Layout.fillWidth: true
+        Layout.preferredHeight: Theme.fs(96)
         radius: Theme.radius
-        color: tileHover.hovered && targetIndex >= 0 ? Theme.surfaceAlt : Theme.surface
+        color: Theme.base
 
         Column {
-            id: tileColumn
             anchors.centerIn: parent
-            spacing: 2
-            Text {
+            spacing: 3
+            Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: value
-                color: tint
-                font.family: Theme.headingFont
-                font.pixelSize: Theme.fs(26)
-                font.weight: Font.Bold
+                spacing: 8
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: icon
+                    color: Theme.textSecondary
+                    font.pixelSize: Theme.fs(18)
+                }
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: value
+                    color: tint
+                    font.family: Theme.headingFont
+                    font.pixelSize: Theme.fs(28)
+                    font.weight: Font.Bold
+                }
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -57,8 +68,6 @@ Flickable {
                 font.pixelSize: Theme.fs(11)
             }
         }
-        HoverHandler { id: tileHover; cursorShape: targetIndex >= 0 ? Qt.PointingHandCursor : Qt.ArrowCursor }
-        TapHandler { onTapped: if (targetIndex >= 0) root.navigate(targetIndex) }
     }
 
     Column {
@@ -69,95 +78,90 @@ Flickable {
         // Search — sends you straight to Explore with results.
         SearchBar {
             width: parent.width
+            bg: Theme.base
             placeholder: qsTr("Search %1 packages…").arg(App.managerName)
             onAccepted: query => { if (query.trim().length > 0) root.searchRequested(query.trim()) }
         }
 
-        // Stats — centered grid
-        Grid {
-            id: statsGrid
-            readonly property int tileSlot: Theme.fs(128) + 10
-            anchors.horizontalCenter: parent.horizontalCenter
-            columns: Math.max(1, Math.floor(content.width / tileSlot))
+        // Stats — full width, informative only
+        RowLayout {
+            width: parent.width
             spacing: 10
 
             StatTile {
+                icon: "▤"
                 value: App.installedModel.totalCount
                 label: qsTr("installed")
-                targetIndex: 2
             }
             Repeater {
                 model: App.installedModel.kindSummary.length > 1
                        ? App.installedModel.kindSummary : []
                 delegate: StatTile {
                     required property var modelData
+                    icon: "❒"
                     value: modelData.count
                     label: modelData.kind.length > 0 ? modelData.kind : qsTr("other")
                     tint: Theme.textPrimary
-                    targetIndex: 2
                 }
             }
             StatTile {
+                icon: "↺"
                 value: App.outdatedModel.count
                 label: qsTr("upgradable")
                 tint: App.outdatedModel.count > 0 ? Theme.danger : Theme.success
-                targetIndex: 3
             }
             StatTile {
                 visible: App.installedModel.pinnedCount > 0
+                icon: "⚑"
                 value: App.installedModel.pinnedCount
                 label: qsTr("pinned")
                 tint: Theme.textPrimary
-                targetIndex: 2
             }
             StatTile {
                 visible: root.sourcesCount >= 0
+                icon: "⑂"
                 value: root.sourcesCount
                 label: qsTr("taps")
                 tint: Theme.textPrimary
             }
         }
 
-        // Promo: curated storefront in Explore.
+        // Promo: curated storefront in Explore (centered).
         Rectangle {
             width: parent.width
-            height: Theme.fs(72)
+            height: promoColumn.implicitHeight + 32
             radius: Theme.radius
             color: Theme.accentSubtle
             border.color: Theme.accent
 
             Column {
-                anchors.left: parent.left
-                anchors.leftMargin: 16
-                anchors.right: promoBtn.left
-                anchors.rightMargin: 12
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: 3
+                id: promoColumn
+                anchors.centerIn: parent
+                width: parent.width - 40
+                spacing: 8
                 Text {
-                    width: parent.width
+                    anchors.horizontalCenter: parent.horizontalCenter
                     text: qsTr("Explore the author's selection")
                     color: Theme.textPrimary
                     font.family: Theme.headingFont
-                    font.pixelSize: Theme.fs(15)
+                    font.pixelSize: Theme.fs(16)
                     font.weight: Font.DemiBold
-                    elide: Text.ElideRight
                 }
                 Text {
-                    width: parent.width
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: Math.min(parent.width, implicitWidth)
+                    horizontalAlignment: Text.AlignHCenter
                     text: qsTr("A curated set of %1 packages, ready to install in one click").arg(App.managerName)
                     color: Theme.textSecondary
                     font.family: Theme.uiFont
                     font.pixelSize: Theme.fs(12)
-                    elide: Text.ElideRight
+                    wrapMode: Text.WordWrap
                 }
-            }
-            AccentButton {
-                id: promoBtn
-                anchors.right: parent.right
-                anchors.rightMargin: 16
-                anchors.verticalCenter: parent.verticalCenter
-                text: qsTr("Explore")
-                onClicked: { App.search(""); root.navigate(1) }
+                AccentButton {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: qsTr("Explore")
+                    onClicked: { App.search(""); root.navigate(1) }
+                }
             }
         }
 
