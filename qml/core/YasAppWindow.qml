@@ -21,12 +21,12 @@ ApplicationWindow {
     property var extraViews: []
 
     readonly property var baseNav: [
-        { label: qsTr("Home"),      icon: "☖" },
-        { label: qsTr("Explore"),   icon: "⌕" },
-        { label: qsTr("Installed"), icon: "▣" },
-        { label: qsTr("Updates"),   icon: "↺" },
-        { label: qsTr("Actions"),   icon: "⚙" },
-        { label: qsTr("Settings"),  icon: "⛭" },
+        { label: qsTr("Home"),      icon: "home" },
+        { label: qsTr("Explore"),   icon: "search" },
+        { label: qsTr("Installed"), icon: "box" },
+        { label: qsTr("Updates"),   icon: "refresh" },
+        { label: qsTr("Actions"),   icon: "tools" },
+        { label: qsTr("Settings"),  icon: "settings" },
     ]
     readonly property int historyIndex: 6 + extraViews.length
     readonly property bool railOpen: YasManager.railExpanded
@@ -163,9 +163,9 @@ ApplicationWindow {
                         anchors.leftMargin: 16
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 12
-                        Text {
-                            text: modelData.icon
-                            font.pixelSize: Theme.fs(20)
+                        YasIcon {
+                            name: modelData.icon
+                            size: Theme.fs(20)
                             color: stack.currentIndex === index ? Theme.accent
                                                                 : Theme.textSecondary
                             anchors.verticalCenter: parent.verticalCenter
@@ -184,10 +184,10 @@ ApplicationWindow {
                     Column {
                         visible: !window.railOpen
                         anchors.centerIn: parent
-                        spacing: 2
-                        Text {
-                            text: modelData.icon
-                            font.pixelSize: Theme.fs(22)
+                        spacing: 3
+                        YasIcon {
+                            name: modelData.icon
+                            size: Theme.fs(22)
                             color: stack.currentIndex === index ? Theme.accent
                                                                 : Theme.textSecondary
                             anchors.horizontalCenter: parent.horizontalCenter

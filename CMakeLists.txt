@@ -45,6 +45,7 @@ qt_add_qml_module(yascoreui
         qml/core/components/ThemedSwitch.qml
         qml/core/components/FeaturedView.qml
         qml/core/components/YasDialog.qml
+        qml/core/components/YasIcon.qml
         qml/core/views/HomeView.qml
         qml/core/views/ExplorerView.qml
         qml/core/views/InstalledView.qml
